@@ -8,7 +8,6 @@ use Mcp\Capability\Attribute\McpTool;
 use Mcp\Schema\ToolAnnotations;
 use Neos\ContentRepository\Domain\Model\NodeType;
 use Neos\Flow\Annotations as Flow;
-use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 
 #[Flow\Proxy(false)]
 class NodeTypeSchemaCapabilities
@@ -17,7 +16,7 @@ class NodeTypeSchemaCapabilities
     public const BASIC_URI = 'nodetypes://basic-schema';
 
     public function __construct(
-        protected NodeTypeManager $nodeTypeManager,
+        protected ExposedNodeTypes $exposedNodeTypes,
         protected NodePropertyValidation $nodePropertyValidation,
     ) {
     }
@@ -32,7 +31,7 @@ class NodeTypeSchemaCapabilities
               - which node type has what properties of what type
               - which constraints regarding properties or allowed child nodes exist
               - which tethered nodes exist per node type.
-            Both the structural constraints and the property validators are enforced on the write side, so this is the single source of truth for all schema validation information: a value that violates the validation of its property is rejected, not stored.',
+            Both the structural constraints and the property validators are enforced on the write side, so this is the single source of truth for all schema validation information: a value that violates the validation of its property is rejected, not stored. Only the listed node types can be created; abstract types are never listed, they serve as filters of the read tools.',
         annotations: new ToolAnnotations(
             readOnlyHint: true,
             destructiveHint: false,
@@ -43,7 +42,7 @@ class NodeTypeSchemaCapabilities
     public function getFull(): array
     {
         $schema = [];
-        foreach ($this->nodeTypeManager->getSubNodeTypes('Sitegeist.SlopMachine:Mixin.MCPExposed', false) as $nodeType) {
+        foreach ($this->exposedNodeTypes->all() as $nodeType) {
             $schema[$nodeType->getName()] = [
                 'name' => $nodeType->getConfiguration('options.mcp.name'),
                 'description' => $nodeType->getConfiguration('options.mcp.description'),
@@ -74,7 +73,8 @@ class NodeTypeSchemaCapabilities
             'uri' => self::FULL_URI,
             'name' => 'Node Type Schema',
             'description' => 'The node types that are exposed to MCP, which is the set of node types you can address with the create and write tools.
-                A node type is included when it, or one of its super types, is marked with the mixin Sitegeist.SlopMachine:Mixin.MCPExposed. Node types outside that set are not listed and should not be used; if a node type you need is missing, say so instead of guessing a name.
+                A node type is included when it, or one of its super types, is marked with the mixin Sitegeist.SlopMachine:Mixin.MCPExposed. Node types outside that set are not listed, and a create command that names one is rejected; if a node type you need is missing, say so instead of guessing a name.
+                Abstract node types are never listed and can never be instantiated - the create tools reject them - but they remain valid as filters of the read tools, where a type also matches the concrete types below it.
                 The properties field defines all properties that can be set on a node of that type.
                 An exception are properties of type reference or references. Those can reference other nodes instead. Single reference properties can be set to the target node\'s aggregate id. Properties of type references can be set to a list of node aggregate ids. Use the SetNodeReferences tool for writing references.
                 The required flag marks properties that carry a not-empty validation, which is a hint and not a guarantee that a value will be accepted.
@@ -110,7 +110,7 @@ class NodeTypeSchemaCapabilities
     public function getBasic(): array
     {
         $schema = [];
-        foreach ($this->nodeTypeManager->getSubNodeTypes('Sitegeist.SlopMachine:Mixin.MCPExposed', false) as $nodeType) {
+        foreach ($this->exposedNodeTypes->all() as $nodeType) {
             $schema[$nodeType->getName()] = [
                 'name' => $nodeType->getConfiguration('options.mcp.name'),
                 'description' => $nodeType->getConfiguration('options.mcp.description'),
@@ -131,9 +131,10 @@ class NodeTypeSchemaCapabilities
         }
 
         return [
-            'uri' => self::FULL_URI,
+            'uri' => self::BASIC_URI,
             'name' => 'Node Type Schema',
             'description' => 'The list of available node types with reduced information.
+                Only a node type listed here can be created; a create command that names a type outside this list - an abstract type such as a core supertype included - is rejected before anything is created. Abstract types remain valid as filters of the read tools.
                 The properties field defines all properties that can be set on a node of that type.
                 An exception are properties of type reference or references. Those can reference other nodes instead. Single reference properties can be set to the target node\'s aggregate id. Properties of type references can be set to a list of node aggregate ids. Use the SetNodeReferences tool for writing references.
                 The validation.constraints field states the limits a value has to satisfy, for example maxLength or a regular expression pattern; a value that violates one of them is rejected on write. The raw validator configuration behind it is in the full schema.

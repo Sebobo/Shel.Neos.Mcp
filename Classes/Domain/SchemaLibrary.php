@@ -62,6 +62,7 @@ final class SchemaLibrary
     public const CREATE_NODEAGGREGATE_WITH_NODE_SCHEMA = [
         'type' => 'object',
         'description' => 'A single CreateNodeAggregateWithNode command. Creates a new node with the given parameters.
+            The nodeTypeName must name a concrete node type from the nodetype schema listing; an abstract node type such as a core supertype is a search filter for the read tools, never something to create, and a command that names one - or a type outside the listed set - is rejected before anything is created.
             If you want to perform subsequent actions using the created node, you can provide its nodeAggregateId with the optional nodeAggregateId parameter. By default, UUIDs are to be used.
             Node names are strictly optional and should not be used for regular editorial nodes.
             The succeedingSiblingNodeAggregateId is optional, only use it if a position relative to the siblings is explicitly requested.

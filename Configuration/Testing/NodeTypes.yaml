@@ -5,11 +5,17 @@
 # against the distribution of the CI as well.
 #
 # A document that owns its content in a collection, and a content element with an image - the
-# two things the tests write.
+# two things the tests write. They carry the MCPExposed mixin themselves, because the write
+# tools only accept types from that set and the tests must not lean on an installation that
+# happens to mark the core types with it.
+#
+# The last type stays outside the exposed set - it is what the tests use to check that a
+# create command naming a type the schema does not list is rejected.
 
 'Sitegeist.SlopMachine:Testing:Document.Page':
   superTypes:
     'Neos.Neos:Document': true
+    'Sitegeist.SlopMachine:Mixin.MCPExposed': true
   properties:
     title:
       type: string
@@ -20,6 +26,7 @@
 'Sitegeist.SlopMachine:Testing:Content.Text':
   superTypes:
     'Neos.Neos:Content': true
+    'Sitegeist.SlopMachine:Mixin.MCPExposed': true
   properties:
     text:
       type: string
@@ -27,10 +34,16 @@
 'Sitegeist.SlopMachine:Testing:Content.Image':
   superTypes:
     'Neos.Neos:Content': true
+    'Sitegeist.SlopMachine:Mixin.MCPExposed': true
   properties:
     image:
       type: 'Neos\Media\Domain\Model\ImageInterface'
     alternativeText:
       type: string
+    title:
+      type: string
+
+'Sitegeist.SlopMachine:Testing:Unexposed':
+  properties:
     title:
       type: string

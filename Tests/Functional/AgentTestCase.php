@@ -243,20 +243,26 @@ abstract class AgentTestCase extends FunctionalTestCase
 
     /**
      * The content of the tests: a site with one document, published to live.
+     *
+     * The content predates the identity of the agent - the policies of an installation may
+     * not grant anything to the anonymous user this setup runs as, and what the agent may do
+     * is decided by the policies when the tests call the capabilities.
      */
     protected function createContentInLiveWorkspace(): void
     {
-        $liveContext = $this->contextFactory->create([
-            'workspaceName' => 'live',
-            'dimensions' => $this->dimensions(),
-        ]);
-        $rootNode = $liveContext->getRootNode();
+        $this->securityContext->withoutAuthorizationChecks(function (): void {
+            $liveContext = $this->contextFactory->create([
+                'workspaceName' => 'live',
+                'dimensions' => $this->dimensions(),
+            ]);
+            $rootNode = $liveContext->getRootNode();
 
-        $sitesNode = $rootNode->createNode('sites', $this->nodeTypeManager->getNodeType('Neos.Neos:Sites'));
-        $siteNode = $sitesNode->createNode($this->siteNodeName, $this->nodeTypeManager->getNodeType('Neos.Neos:Site'));
+            $sitesNode = $rootNode->createNode('sites', $this->nodeTypeManager->getNodeType('Neos.Neos:Sites'));
+            $siteNode = $sitesNode->createNode($this->siteNodeName, $this->nodeTypeManager->getNodeType('Neos.Neos:Site'));
 
-        $page = $siteNode->createNode('home', $this->nodeTypeManager->getNodeType(self::PAGE_NODE_TYPE));
-        $page->setProperty('title', 'Home');
+            $page = $siteNode->createNode('home', $this->nodeTypeManager->getNodeType(self::PAGE_NODE_TYPE));
+            $page->setProperty('title', 'Home');
+        });
     }
 
     /**

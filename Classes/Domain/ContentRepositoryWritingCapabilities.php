@@ -26,6 +26,7 @@ class ContentRepositoryWritingCapabilities
         protected NodeTypeManager $nodeTypeManager,
         protected PropertyMapper $propertyMapper,
         protected NodePropertyValidation $nodePropertyValidation,
+        protected ExposedNodeTypes $exposedNodeTypes,
     ) {
     }
 
@@ -141,7 +142,7 @@ class ContentRepositoryWritingCapabilities
             Each command must define its `type` (CreateNodeAggregateWithNode, SetNodeProperties, SetNodeReferences) and has the same properties as the corresponding tools.
             The originDimensionSpacePoint of each command must be a dimension space point this installation allows; call the dimensionspace tool once to get the points you can use and pass the same one to every command of a batch. An empty object {} is the correct value for an installation without content dimensions.
             An example command would be {"type": "SetNodeProperties", "nodeAggregateId": "8a887309-5803-458d-b30a-40736f5a5d82", "originDimensionSpacePoint": {}, "propertyValues": {"title": "My Title"}}
-            A command that names a node or parent that does not exist, or a node type that is not allowed there, is reported as failed with that reason; commands that already succeeded stay applied.
+            A command that names a node or parent that does not exist, or a node type that is not allowed there, is reported as failed with that reason; the same holds for a create command that names an abstract node type or a type outside the node type schema, because only a concrete type the schema lists can be created. Commands that already succeeded stay applied.
             The commands are unserialized along with the `commands` parameter and must not be double encoded.
             Returns an object with the outcome of the batch: `successCount`, `failureCount` and `results`,
             where `results` holds one entry per issued command in the order the commands were sent.
@@ -237,16 +238,18 @@ class ContentRepositoryWritingCapabilities
         $result = [];
         try {
             $parentNode = $this->requireNode($contentContext, $parentNodeAggregateId);
-            // Before the node exists: a rejected command that left a half created node
-            // behind would invite a retry that creates a duplicate.
-            $this->requireValidPropertyValues($this->nodeTypeManager->getNodeType($nodeTypeName), $initialPropertyValues);
+            $nodeType = $this->nodeTypeManager->getNodeType($nodeTypeName);
+            // Before the node exists, and before the values: the content repository does not
+            // guard against abstract or unexposed types on the write path, so this tool is
+            // the place where "you can only create what the schema lists" has to hold.
+            $this->requireCreatableNodeType($nodeType);
+            $this->requireValidPropertyValues($nodeType, $initialPropertyValues);
             /** @var Node $createdNode */
             $createdNode = $parentNode->createNode(
                 $nodeName ?: NodePaths::generateRandomNodeName(),
-                $this->nodeTypeManager->getNodeType($nodeTypeName),
+                $nodeType,
                 $nodeAggregateId,
             );
-            $nodeType = $this->nodeTypeManager->getNodeType($nodeTypeName);
             if ($initialPropertyValues !== []) {
                 $this->setProperties($createdNode, $initialPropertyValues);
             }
@@ -387,6 +390,31 @@ class ContentRepositoryWritingCapabilities
             }
             $propertyValue = $this->convertPropertyValue($propertyName, $expectedType, $propertyValue);
             $node->setProperty($propertyName, $propertyValue);
+        }
+    }
+
+    /**
+     * Rejects a create command that names a type the agent may not instantiate.
+     *
+     * The old content repository does not enforce abstractness anywhere on the write path -
+     * the editor UI only hides abstract types from the creation dialog - and it knows nothing
+     * of the exposed set, so both rules live here. The message keeps the two cases apart,
+     * because an abstract type is not a mistake of vocabulary but of the verb: it stays a
+     * valid filter for the read tools.
+     */
+    private function requireCreatableNodeType(NodeType $nodeType): void
+    {
+        if ($nodeType->isAbstract()) {
+            throw new \RuntimeException(\sprintf(
+                'Node type %s is abstract and can never be instantiated. Abstract types are valid as filters of the read tools, but a node has to be created from a concrete type listed by the node type schema.',
+                $nodeType->getName()
+            ));
+        }
+        if (!$this->exposedNodeTypes->isCreatable($nodeType)) {
+            throw new \RuntimeException(\sprintf(
+                'Node type %s is not exposed to MCP and cannot be created. Say so instead of guessing a name; the nodetype-basic-schema tool lists the types you can create.',
+                $nodeType->getName()
+            ));
         }
     }
 

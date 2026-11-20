@@ -118,6 +118,90 @@ class AgentCapabilitiesTest extends AgentTestCase
     }
 
     /**
+     * An abstract node type names a search, never an instance.
+     *
+     * The content repository does not guard against instantiating abstract types - the
+     * create tools have to, and the guard must not cost the read tools their filter.
+     */
+    public function testAnAbstractNodeTypeCannotBeCreatedButCanStillBeSearched(): void
+    {
+        $capabilities = $this->capability(ContentRepositoryWritingCapabilities::class);
+        $before = $this->documentCountUnderSite();
+        self::assertGreaterThan(0, $before, 'The abstract type is a valid search filter.');
+
+        $result = $capabilities->createNodeAggregateWithNode([
+            'nodeTypeName' => 'Neos.Neos:Document',
+            'parentNodeAggregateId' => $this->siteRootAggregateId(),
+            'originDimensionSpacePoint' => $this->dimensionSpacePoint(),
+            'initialPropertyValues' => ['title' => 'A bare document', 'uriPathSegment' => 'bare-document'],
+        ]);
+
+        self::assertFalse($result['structuredContent']['success'] ?? true, 'An abstract node type cannot be created.');
+        self::assertStringContainsString('abstract', (string)($result['structuredContent']['message'] ?? ''));
+        self::assertSame($before, $this->documentCountUnderSite(), 'The rejected command created nothing.');
+    }
+
+    public function testANodeTypeOutsideTheExposedSetCannotBeCreated(): void
+    {
+        $capabilities = $this->capability(ContentRepositoryWritingCapabilities::class);
+
+        $result = $capabilities->createNodeAggregateWithNode([
+            'nodeTypeName' => 'Sitegeist.SlopMachine:Testing:Unexposed',
+            'parentNodeAggregateId' => $this->siteRootAggregateId(),
+            'originDimensionSpacePoint' => $this->dimensionSpacePoint(),
+        ]);
+
+        self::assertFalse($result['structuredContent']['success'] ?? true, 'A node type the schema does not list cannot be created.');
+        self::assertStringContainsString('not exposed', (string)($result['structuredContent']['message'] ?? ''));
+    }
+
+    public function testBulkWritingReportsTheRejectedCreateAndKeepsTheRest(): void
+    {
+        $document = $this->documentIn($this->agentWorkspace);
+        self::assertInstanceOf(NodeInterface::class, $document);
+
+        $capabilities = $this->capability(ContentRepositoryWritingCapabilities::class);
+        $result = $capabilities->bulkWriting([
+            [
+                'type' => 'CreateNodeAggregateWithNode',
+                'nodeTypeName' => 'Neos.Neos:Document',
+                'parentNodeAggregateId' => $this->siteRootAggregateId(),
+                'originDimensionSpacePoint' => $this->dimensionSpacePoint(),
+            ],
+            [
+                'type' => 'SetNodeProperties',
+                'nodeAggregateId' => $document->getIdentifier(),
+                'originDimensionSpacePoint' => $this->dimensionSpacePoint(),
+                'propertyValues' => ['title' => 'Untouched by the failed command'],
+            ],
+        ]);
+
+        self::assertSame(1, $result['failureCount'], 'The create of an abstract type fails.');
+        self::assertStringContainsString('abstract', (string)($result['results'][0]['message'] ?? ''));
+        self::assertSame(1, $result['successCount'], 'The commands around it are applied.');
+    }
+
+    /**
+     * The number of documents below the site - and the proof that the abstract type still
+     * works as a filter of the read tools.
+     */
+    protected function documentCountUnderSite(): int
+    {
+        $reading = $this->capability(ContentRepositoryReadingCapabilities::class);
+        $result = $reading->findChildren(
+            $this->siteRootAggregateId(),
+            'Neos.Neos:Document',
+            'title',
+            100,
+            [],
+            $this->dimensionSpacePoint(),
+        );
+        self::assertIsInt($result['returnedCount'] ?? null, 'The read with the abstract filter succeeds: ' . (string)($result['message'] ?? ''));
+
+        return (int)$result['returnedCount'];
+    }
+
+    /**
      * A capability: the handler container builds them, because they are not proxied.
      *
      * @template T of object

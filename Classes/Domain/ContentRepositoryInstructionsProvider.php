@@ -21,6 +21,7 @@ final class ContentRepositoryInstructionsProvider implements InstructionsProvide
             Nodes can also have reference relations to other nodes.
             Nodes are of a specific node type which declares the schema of that node.
             This includes what properties nodes of this type have, what other nodes can be referenced and what type child nodes of nodes of this type may have.
+            A node type name serves two roles and they must not be mixed up: it is a filter for the read tools, where an abstract type also matches the concrete types below it, and it is the type of a node to create - and only a concrete type listed by the node type schema can ever be created. The create tools reject an abstract type and a type outside that set before anything is written.
             The Neos Content Repository uses a strictly validated CQRS model. All command or query parameters are strictly validated, errors are clearly communicated.
             Any decisions made by the tools are communicated in their response.
             A `success: true` response confirms the command was accepted; the write itself has happened. Re-read the affected properties when exact values matter: `uriPathSegment` is silently re-suffixed by the content repository on collision (so the stored value can be `beratung-1` while the call reported `beratung`), and a write that became a duplicate is only visible after a read. Use read-back before declaring a write done when the value must match what was sent.
