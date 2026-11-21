@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Neos\ContentRepository\Domain\Model\Workspace;
 use Neos\ContentRepository\Domain\Repository\WorkspaceRepository;
@@ -33,7 +33,7 @@ class SharedWorkspaceContextFactory
     public const LIVE_WORKSPACE = 'live';
 
     /**
-     * @param array<string,mixed> $agentSettings Sitegeist:SlopMachine:agent
+     * @param array<string,mixed> $agentSettings Shel.Neos.Mcp.agent
      */
     public function __construct(
         protected ContentContextFactory $contentContextFactory,
@@ -55,7 +55,7 @@ class SharedWorkspaceContextFactory
         $workspaceName = $this->agentSettings['sharedWorkspace'] ?? null;
         if (!\is_string($workspaceName) || $workspaceName === '') {
             throw new \RuntimeException(
-                'No shared workspace is configured. Set Sitegeist:SlopMachine:agent:sharedWorkspace to the name'
+                'No shared workspace is configured. Set Shel.Neos.Mcp.agent.sharedWorkspace to the name'
                 . ' of the workspace the agent may hand its work over to.',
                 1758250001
             );

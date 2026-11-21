@@ -1,4 +1,4 @@
-Sitegeist.SlopMachine:Mixin.MCPExposed:
+Shel.Neos.Mcp:Mixin.MCPExposed:
   abstract: true
   options:
     mcp:

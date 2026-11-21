@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Neos\ContentRepository\Domain\Model\NodeType;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
@@ -21,7 +21,7 @@ use Neos\Flow\Annotations as Flow;
 #[Flow\Scope('singleton')]
 class ExposedNodeTypes
 {
-    public const MIXIN = 'Sitegeist.SlopMachine:Mixin.MCPExposed';
+    public const MIXIN = 'Shel.Neos.Mcp:Mixin.MCPExposed';
 
     public function __construct(
         protected NodeTypeManager $nodeTypeManager,

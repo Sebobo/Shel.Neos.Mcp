@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Tests\Functional;
+namespace Shel\Neos\Mcp\Tests\Functional;
 
-use Sitegeist\SlopMachine\Domain\MediaReadingCapabilities;
+use Shel\Neos\Mcp\Domain\MediaReadingCapabilities;
 
 /**
  * The tools that list the media.

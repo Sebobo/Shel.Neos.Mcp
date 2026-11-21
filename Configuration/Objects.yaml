@@ -1,11 +1,11 @@
 # Settings and other scalars cannot be injected into #[Flow\Proxy(false)] capability classes, so the
 # agent configuration is read by a regular Flow singleton which the capabilities depend on instead.
-Sitegeist\SlopMachine\Domain\SharedWorkspaceContextFactory:
+Shel\Neos\Mcp\Domain\SharedWorkspaceContextFactory:
   arguments:
     5:
-      setting: 'Sitegeist.SlopMachine.agent'
+      setting: 'Shel.Neos.Mcp.agent'
 
-Sitegeist\SlopMachine\Domain\MediaUploadSettings:
+Shel\Neos\Mcp\Domain\MediaUploadSettings:
   arguments:
     1:
-      setting: 'Sitegeist.SlopMachine.agent.media'
+      setting: 'Shel.Neos.Mcp.agent.media'

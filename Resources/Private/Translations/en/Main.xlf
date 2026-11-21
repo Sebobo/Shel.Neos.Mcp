@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file original="" product="Sitegeist.SlopMachine" source-language="en" datatype="plaintext">
+    <file original="" product="Shel.Neos.Mcp" source-language="en" datatype="plaintext">
         <body>
             <trans-unit id="module.headline">
                 <source>Instructions of the agents</source>
@@ -9,7 +9,7 @@
                 <source>Your own entries are sent to the agent in one block, after the instructions that are configured for its role.</source>
             </trans-unit>
             <trans-unit id="module.hintNotSent">
-                <source>Your own entries are not sent to any agent: the provider that reads them is not configured for a role. Register "Sitegeist\SlopMachine\Domain\AdditionalInstructionsProvider" in the instructions of the role of the agent.</source>
+                <source>Your own entries are not sent to any agent: the provider that reads them is not configured for a role. Register "Shel\Neos\Mcp\Domain\AdditionalInstructionsProvider" in the instructions of the role of the agent.</source>
             </trans-unit>
             <trans-unit id="list.add">
                 <source>Add entry</source>

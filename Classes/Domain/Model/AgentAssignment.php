@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain\Model;
+namespace Shel\Neos\Mcp\Domain\Model;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Model\User;

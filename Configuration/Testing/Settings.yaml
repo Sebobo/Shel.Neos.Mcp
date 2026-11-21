@@ -10,4 +10,4 @@ Neos:
   Flow:
     aop:
       globalObjects:
-        userInformation: Sitegeist\SlopMachine\Security\AgentAwareUserService
+        userInformation: Shel\Neos\Mcp\Security\AgentAwareUserService

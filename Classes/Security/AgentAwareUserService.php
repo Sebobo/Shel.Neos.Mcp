@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Security;
+namespace Shel\Neos\Mcp\Security;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Model\User;
 use Neos\Neos\Service\UserService;
-use Sitegeist\SlopMachine\Domain\Repository\AgentAssignmentRepository;
+use Shel\Neos\Mcp\Domain\Repository\AgentAssignmentRepository;
 
 /**
  * The user information of the policy expressions, with the Neos user of the agent for a token account.

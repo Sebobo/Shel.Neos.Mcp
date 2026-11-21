@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Tests\Functional;
+namespace Shel\Neos\Mcp\Tests\Functional;
 
 use Neos\ContentRepository\Domain\Model\NodeInterface;
 use Sitegeist\Pandora\Infrastructure\CapabilityHandlerContainer;
-use Sitegeist\SlopMachine\Domain\PreviewCapabilities;
+use Shel\Neos\Mcp\Domain\PreviewCapabilities;
 
 /**
  * The preview of a document: the URL the agent fetches to see the rendered page.

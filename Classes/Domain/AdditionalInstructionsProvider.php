@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Sitegeist\Pandora\Instruction\InstructionsProvider;
-use Sitegeist\SlopMachine\Domain\Repository\InstructionRepository;
+use Shel\Neos\Mcp\Domain\Repository\InstructionRepository;
 
 /**
  * The instructions the administrators wrote, sent to the agent.
@@ -20,7 +20,7 @@ use Sitegeist\SlopMachine\Domain\Repository\InstructionRepository;
  *       Pandora:
  *         instructions:
  *           'YourRole:McpAgent':
- *             additionalInstructions: 'Sitegeist\SlopMachine\Domain\AdditionalInstructionsProvider'
+ *             additionalInstructions: 'Shel\Neos\Mcp\Domain\AdditionalInstructionsProvider'
  */
 final class AdditionalInstructionsProvider implements InstructionsProvider
 {

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Neos\ContentRepository\Domain\Model\Workspace;
 use Neos\ContentRepository\Domain\Repository\WorkspaceRepository;
 use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Service\UserService;
 use Neos\Neos\Utility\User as UserUtility;
-use Sitegeist\SlopMachine\Domain\Repository\AgentAssignmentRepository;
+use Shel\Neos\Mcp\Domain\Repository\AgentAssignmentRepository;
 
 /**
  * Resolves the personal workspace of the Neos user the calling agent is assigned to.

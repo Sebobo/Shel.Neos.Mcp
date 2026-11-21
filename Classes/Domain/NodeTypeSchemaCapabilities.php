@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Schema\ToolAnnotations;
@@ -73,7 +73,7 @@ class NodeTypeSchemaCapabilities
             'uri' => self::FULL_URI,
             'name' => 'Node Type Schema',
             'description' => 'The node types that are exposed to MCP, which is the set of node types you can address with the create and write tools.
-                A node type is included when it, or one of its super types, is marked with the mixin Sitegeist.SlopMachine:Mixin.MCPExposed. Node types outside that set are not listed, and a create command that names one is rejected; if a node type you need is missing, say so instead of guessing a name.
+                A node type is included when it, or one of its super types, is marked with the mixin Shel.Neos.Mcp:Mixin.MCPExposed. Node types outside that set are not listed, and a create command that names one is rejected; if a node type you need is missing, say so instead of guessing a name.
                 Abstract node types are never listed and can never be instantiated - the create tools reject them - but they remain valid as filters of the read tools, where a type also matches the concrete types below it.
                 The properties field defines all properties that can be set on a node of that type.
                 An exception are properties of type reference or references. Those can reference other nodes instead. Single reference properties can be set to the target node\'s aggregate id. Properties of type references can be set to a list of node aggregate ids. Use the SetNodeReferences tool for writing references.

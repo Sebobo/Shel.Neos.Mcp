@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Controller;
+namespace Shel\Neos\Mcp\Controller;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\I18n\Translator;
 use Neos\Fusion\View\FusionView;
 use Neos\Neos\Controller\Module\AbstractModuleController;
-use Sitegeist\SlopMachine\Domain\AdditionalInstructionsProvider;
-use Sitegeist\SlopMachine\Domain\ConfiguredInstructionsService;
-use Sitegeist\SlopMachine\Domain\InstructionService;
+use Shel\Neos\Mcp\Domain\AdditionalInstructionsProvider;
+use Shel\Neos\Mcp\Domain\ConfiguredInstructionsService;
+use Shel\Neos\Mcp\Domain\InstructionService;
 
 /**
  * The backend module of the agents: it shows the instructions the agents are told, and lets
@@ -255,7 +255,7 @@ final class AgentInstructionsController extends AbstractModuleController
                 null,
                 null,
                 'Main',
-                'Sitegeist.SlopMachine'
+                'Shel.Neos.Mcp'
             );
         }
 
@@ -266,7 +266,7 @@ final class AgentInstructionsController extends AbstractModuleController
                 null,
                 null,
                 'Main',
-                'Sitegeist.SlopMachine'
+                'Shel.Neos.Mcp'
             );
         }
 
@@ -277,7 +277,7 @@ final class AgentInstructionsController extends AbstractModuleController
                 null,
                 null,
                 'Main',
-                'Sitegeist.SlopMachine'
+                'Shel.Neos.Mcp'
             );
         }
 

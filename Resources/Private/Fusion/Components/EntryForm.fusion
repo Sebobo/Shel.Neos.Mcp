@@ -4,7 +4,7 @@
 # The fields of the form are named after the namespace of the module arguments, so that the
 # backend hands them to the action of the module.
 #
-prototype(Sitegeist.SlopMachine:Component.EntryForm) < prototype(Neos.Fusion:Component) {
+prototype(Shel.Neos.Mcp:Component.EntryForm) < prototype(Neos.Fusion:Component) {
     @propTypes {
         @strict = false
         form = ${PropTypes.any}
@@ -13,7 +13,7 @@ prototype(Sitegeist.SlopMachine:Component.EntryForm) < prototype(Neos.Fusion:Com
     form = ${form}
 
     @private {
-        i18n = ${I18n.id('').source('Main').package('Sitegeist.SlopMachine')}
+        i18n = ${I18n.id('').source('Main').package('Shel.Neos.Mcp')}
 
         saveUri = Neos.Fusion:UriBuilder {
             action = ${props.form.mode == 'edit' ? 'update' : 'create'}
@@ -28,33 +28,33 @@ prototype(Sitegeist.SlopMachine:Component.EntryForm) < prototype(Neos.Fusion:Com
     }
 
     renderer = afx`
-        <div class="slopmachine-instructions-detail">
+        <div class="neos-mcp-instructions-detail">
             <h2>{private.i18n.id(props.form.mode == 'edit' ? 'form.editHeadline' : 'form.createHeadline').translate()}</h2>
             <form
                 class="neos-form"
                 hx-post={private.saveUri}
-                hx-target="#slopmachine-agent-instructions"
+                hx-target="#neos-mcp-agent-instructions"
                 hx-swap="outerHTML"
             >
                 <div class="neos-form-field">
-                    <label class="neos-form-label" for="slopmachine-instruction-title">
+                    <label class="neos-form-label" for="neos-mcp-instruction-title">
                         {private.i18n.id('form.title').translate()}
                     </label>
                     <input
                         class="neos-form-input"
                         type="text"
-                        id="slopmachine-instruction-title"
+                        id="neos-mcp-instruction-title"
                         name="moduleArguments[title]"
                         value={props.form.title}
                     />
                 </div>
                 <div class="neos-form-field">
-                    <label class="neos-form-label" for="slopmachine-instruction-instructions">
+                    <label class="neos-form-label" for="neos-mcp-instruction-instructions">
                         {private.i18n.id('form.instructions').translate()}
                     </label>
                     <textarea
                         class="neos-form-textarea"
-                        id="slopmachine-instruction-instructions"
+                        id="neos-mcp-instruction-instructions"
                         name="moduleArguments[instructions]"
                         rows="18"
                     >{props.form.instructions}</textarea>
@@ -68,7 +68,7 @@ prototype(Sitegeist.SlopMachine:Component.EntryForm) < prototype(Neos.Fusion:Com
                         type="button"
                         class="neos-button"
                         hx-get={private.cancelUri}
-                        hx-target="#slopmachine-agent-instructions"
+                        hx-target="#neos-mcp-agent-instructions"
                         hx-swap="outerHTML"
                     >
                         {private.i18n.id('action.cancel').translate()}

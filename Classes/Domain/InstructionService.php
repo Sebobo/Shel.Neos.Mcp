@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\PersistenceManagerInterface;
-use Sitegeist\SlopMachine\Domain\Model\Instruction;
-use Sitegeist\SlopMachine\Domain\Repository\InstructionRepository;
+use Shel\Neos\Mcp\Domain\Model\Instruction;
+use Shel\Neos\Mcp\Domain\Repository\InstructionRepository;
 
 /**
  * Maintains the instructions the administrators wrote: they are created, edited, deleted and

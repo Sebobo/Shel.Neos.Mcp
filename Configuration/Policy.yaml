@@ -3,25 +3,25 @@
 # Every MCP capability is deny-by-default, so each one the agent may use has to be granted here
 # explicitly. The package ships two roles for the agent:
 #
-#   Sitegeist.SlopMachine:McpAgent                 the read-only baseline: an agent that may look,
+#   Shel.Neos.Mcp:McpAgent                 the read-only baseline: an agent that may look,
 #                                                   but not write
-#   Sitegeist.SlopMachine:McpAgentWithWriteAccess  the baseline plus the capabilities that create,
+#   Shel.Neos.Mcp:McpAgentWithWriteAccess  the baseline plus the capabilities that create,
 #                                                   change or remove content
 #
 # An installation grants one of them to the account of the agent. The write role grants:
 #
-#   Sitegeist.SlopMachine:Capability.Tool.CreateNodeAggregateWithNode
-#   Sitegeist.SlopMachine:Capability.Tool.SetNodeProperties
-#   Sitegeist.SlopMachine:Capability.Tool.SetNodeReferences
-#   Sitegeist.SlopMachine:Capability.Tool.BulkWriting
-#   Sitegeist.SlopMachine:Capability.Tool.MoveNode
-#   Sitegeist.SlopMachine:Capability.Tool.upload-asset
-#   Sitegeist.SlopMachine:Capability.Tool.RemoveNode
-#   Sitegeist.SlopMachine:Capability.Tool.DiscardChanges
-#   Sitegeist.SlopMachine:Capability.Tool.RemoveFromSharedWorkspace
-#   Sitegeist.SlopMachine:Capability.Tool.PublishOwnWorkspace
-#   Sitegeist.SlopMachine:Capability.Tool.CreateTopicWorkspace
-#   Sitegeist.SlopMachine:Capability.Tool.RebaseOwnWorkspace
+#   Shel.Neos.Mcp:Capability.Tool.CreateNodeAggregateWithNode
+#   Shel.Neos.Mcp:Capability.Tool.SetNodeProperties
+#   Shel.Neos.Mcp:Capability.Tool.SetNodeReferences
+#   Shel.Neos.Mcp:Capability.Tool.BulkWriting
+#   Shel.Neos.Mcp:Capability.Tool.MoveNode
+#   Shel.Neos.Mcp:Capability.Tool.upload-asset
+#   Shel.Neos.Mcp:Capability.Tool.RemoveNode
+#   Shel.Neos.Mcp:Capability.Tool.DiscardChanges
+#   Shel.Neos.Mcp:Capability.Tool.RemoveFromSharedWorkspace
+#   Shel.Neos.Mcp:Capability.Tool.PublishOwnWorkspace
+#   Shel.Neos.Mcp:Capability.Tool.CreateTopicWorkspace
+#   Shel.Neos.Mcp:Capability.Tool.RebaseOwnWorkspace
 #
 # The role inherits from Neos.Neos:RestrictedEditor: the agent needs access to internal workspaces
 # to work in its personal workspace, and it must never be able to publish to the live workspace.
@@ -34,13 +34,13 @@ privilegeTargets:
 
     # The module of the agents: the instructions the agents are told, and the entries the
     # administrators of the installation write themselves.
-    'Sitegeist.SlopMachine:Backend.AgentInstructions':
+    'Shel.Neos.Mcp:Backend.AgentInstructions':
       label: 'Allowed to manage the instructions of the agents'
-      matcher: 'method(Sitegeist\SlopMachine\Controller\AgentInstructionsController->(.*)Action())'
+      matcher: 'method(Shel\Neos\Mcp\Controller\AgentInstructionsController->(.*)Action())'
 
   'Neos\Neos\Security\Authorization\Privilege\ModulePrivilege':
 
-    'Sitegeist.SlopMachine:Backend.Module.Administration.AgentInstructions':
+    'Shel.Neos.Mcp:Backend.Module.Administration.AgentInstructions':
       label: 'Access to the module of the agent instructions'
       matcher: 'administration/agentinstructions'
 
@@ -49,13 +49,13 @@ roles:
   # who know what the agents may and may not do.
   'Neos.Neos:Administrator':
     privileges:
-      - privilegeTarget: 'Sitegeist.SlopMachine:Backend.Module.Administration.AgentInstructions'
+      - privilegeTarget: 'Shel.Neos.Mcp:Backend.Module.Administration.AgentInstructions'
         permission: GRANT
 
-      - privilegeTarget: 'Sitegeist.SlopMachine:Backend.AgentInstructions'
+      - privilegeTarget: 'Shel.Neos.Mcp:Backend.AgentInstructions'
         permission: GRANT
 
-  'Sitegeist.SlopMachine:McpAgent':
+  'Shel.Neos.Mcp:McpAgent':
     label: 'MCP Agent'
     description: 'Lets a token-authenticated agent read the content repository over /mcp. Read-only by default.'
     parentRoles: ['Neos.Neos:RestrictedEditor']
@@ -69,109 +69,109 @@ roles:
         permission: GRANT
 
       # Reading the content repository
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-children'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-children'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-content'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-content'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-documents'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-documents'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-descendants'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-descendants'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-subtree'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-subtree'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.dimensionspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.dimensionspace'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.nodetype-full-schema'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.nodetype-full-schema'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.nodetype-basic-schema'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.nodetype-basic-schema'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.query-patterns'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.query-patterns'
         permission: GRANT
 
       # Reading the sites
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.search-sites'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.search-sites'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.list-site-urls'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.list-site-urls'
         permission: GRANT
 
       # Reading the media
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-asset-collections'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-asset-collections'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-tags'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-tags'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-types'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-types'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-assets'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-assets'
         permission: GRANT
 
       # Reading the own workspace: what the agent changed so far.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.ListUnpublishedChanges'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.ListUnpublishedChanges'
         permission: GRANT
 
       # Reading the shared review workspace
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-children-in-shared-workspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-children-in-shared-workspace'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-content-in-shared-workspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-content-in-shared-workspace'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-documents-in-shared-workspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-documents-in-shared-workspace'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-descendants-in-shared-workspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-descendants-in-shared-workspace'
         permission: GRANT
 
       # The preview of a document: the rendered page of the workspace the agent works in. It only
       # reads, so an agent that may look at the content may look at how it is rendered.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.PreviewDocument'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.PreviewDocument'
         permission: GRANT
 
   # The role of an agent that may write: the read-only baseline of the role above plus the
   # capabilities that create, change or remove content. The writing capabilities run inside
   # withoutAuthorizationChecks(), so this list is the only gate for them.
-  'Sitegeist.SlopMachine:McpAgentWithWriteAccess':
+  'Shel.Neos.Mcp:McpAgentWithWriteAccess':
     label: 'MCP Agent (write access)'
     description: 'Lets a token-authenticated agent read and write the content repository over /mcp'
-    parentRoles: ['Sitegeist.SlopMachine:McpAgent']
+    parentRoles: ['Shel.Neos.Mcp:McpAgent']
     privileges:
       # Writing the content repository: creating nodes, changing their properties and their
       # references, changing several of them at once and moving them.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.CreateNodeAggregateWithNode'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.CreateNodeAggregateWithNode'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.SetNodeProperties'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.SetNodeProperties'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.SetNodeReferences'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.SetNodeReferences'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.BulkWriting'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.BulkWriting'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.MoveNode'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.MoveNode'
         permission: GRANT
 
       # Uploading is a write: the asset is live immediately, no tool can take it back, and it
       # ends up in the media collection like any other upload.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.upload-asset'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.upload-asset'
         permission: GRANT
 
       # Own workspace: removal and revert. RemoveNode and DiscardChanges are the two destructive
       # entries here - drop them to let the agent write but not destroy content.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.RemoveNode'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.RemoveNode'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.DiscardChanges'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.DiscardChanges'
         permission: GRANT
 
       # The hand-over itself: the agent publishes its own workspace into the workspace it is
       # based on, exactly like an editor does. It can never publish into live - the base
       # workspace of the agent's own workspace is the only target, and that is never live.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.PublishOwnWorkspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.PublishOwnWorkspace'
         permission: GRANT
 
       # Topic workspaces: one workspace per topic the agent works on, based on the shared review
       # workspace. They let two agents on different topics work without writing over each other:
       # the agent creates one, rebases its own workspace onto it, and from then on its hand-over
       # lands in the topic workspace, which a human reviews and publishes.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.CreateTopicWorkspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.CreateTopicWorkspace'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.RebaseOwnWorkspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.RebaseOwnWorkspace'
         permission: GRANT
 
       # Removal from the shared review workspace: a write into a workspace humans review, so it
       # is the entry to think twice about.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.RemoveFromSharedWorkspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.RemoveFromSharedWorkspace'
         permission: GRANT

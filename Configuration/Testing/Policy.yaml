@@ -6,18 +6,18 @@
 # preview; with Neos.Neos:RestrictedEditor it also brings the access to the internal
 # workspaces and, with Neos.Neos:AbstractEditor, the frontend preview.
 #
-# Deliberately not Sitegeist.SlopMachine:McpAgentWithWriteAccess: the tests have to see a
+# Deliberately not Shel.Neos.Mcp:McpAgentWithWriteAccess: the tests have to see a
 # capability that is not granted, and a role that grants every write capability could not
 # show that.
 roles:
-  'Sitegeist.SlopMachine:TestAgent':
+  'Shel.Neos.Mcp:TestAgent':
     label: 'MCP Agent (test)'
     description: 'The role of the account of the agent in the tests.'
-    parentRoles: ['Sitegeist.SlopMachine:McpAgent']
+    parentRoles: ['Shel.Neos.Mcp:McpAgent']
     privileges:
       # The writing capabilities the tests use. Everything a capability needs besides them -
       # the endpoint, the login denial, the preview - comes with the parent role.
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.SetNodeProperties'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.SetNodeProperties'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.PublishOwnWorkspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.PublishOwnWorkspace'
         permission: GRANT

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Tests\Functional;
+namespace Shel\Neos\Mcp\Tests\Functional;
 
 use Neos\ContentRepository\Domain\Model\NodeInterface;
 use Neos\Flow\Package\PackageManager;
@@ -10,9 +10,9 @@ use Sitegeist\Pandora\Capability\CapabilityDescriptors;
 use Sitegeist\Pandora\Capability\PackageKeyResolver;
 use Sitegeist\Pandora\Infrastructure\CapabilityHandlerContainer;
 use Sitegeist\Pandora\McpServerBuilderFactory;
-use Sitegeist\SlopMachine\Domain\AgentWorkspaceCapabilities;
-use Sitegeist\SlopMachine\Domain\ContentRepositoryReadingCapabilities;
-use Sitegeist\SlopMachine\Domain\ContentRepositoryWritingCapabilities;
+use Shel\Neos\Mcp\Domain\AgentWorkspaceCapabilities;
+use Shel\Neos\Mcp\Domain\ContentRepositoryReadingCapabilities;
+use Shel\Neos\Mcp\Domain\ContentRepositoryWritingCapabilities;
 
 /**
  * The capabilities of the agent: what it may use, and what it may not.
@@ -146,7 +146,7 @@ class AgentCapabilitiesTest extends AgentTestCase
         $capabilities = $this->capability(ContentRepositoryWritingCapabilities::class);
 
         $result = $capabilities->createNodeAggregateWithNode([
-            'nodeTypeName' => 'Sitegeist.SlopMachine:Testing:Unexposed',
+            'nodeTypeName' => 'Shel.Neos.Mcp:Testing:Unexposed',
             'parentNodeAggregateId' => $this->siteRootAggregateId(),
             'originDimensionSpacePoint' => $this->dimensionSpacePoint(),
         ]);

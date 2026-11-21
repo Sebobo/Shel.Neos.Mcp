@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Tests\Functional;
+namespace Shel\Neos\Mcp\Tests\Functional;
 
 use Neos\ContentRepository\Domain\Model\NodeInterface;
 use Neos\ContentRepository\Domain\Model\Workspace;
@@ -21,9 +21,9 @@ use Neos\Neos\Domain\Repository\SiteRepository;
 use Neos\Neos\Domain\Service\UserService;
 use Neos\Neos\Utility\User as UserUtility;
 use Sitegeist\Pandora\Infrastructure\CapabilityHandlerContainer;
-use Sitegeist\SlopMachine\Domain\DimensionSpacePointResolver;
-use Sitegeist\SlopMachine\Domain\Model\AgentAssignment;
-use Sitegeist\SlopMachine\Domain\Repository\AgentAssignmentRepository;
+use Shel\Neos\Mcp\Domain\DimensionSpacePointResolver;
+use Shel\Neos\Mcp\Domain\Model\AgentAssignment;
+use Shel\Neos\Mcp\Domain\Repository\AgentAssignmentRepository;
 
 /**
  * The base of the tests of the agent.
@@ -52,7 +52,7 @@ abstract class AgentTestCase extends FunctionalTestCase
     /**
      * The role of the account of the agent in the tests.
      */
-    protected const AGENT_ROLE = 'Sitegeist.SlopMachine:TestAgent';
+    protected const AGENT_ROLE = 'Shel.Neos.Mcp:TestAgent';
 
     /**
      * The identifier of the account of the agent - in the installation it is the hash of the
@@ -64,12 +64,12 @@ abstract class AgentTestCase extends FunctionalTestCase
      * The document type of the tests - a type of this package, so that the tests do not
      * depend on the node types of the installation they run in.
      */
-    protected const PAGE_NODE_TYPE = 'Sitegeist.SlopMachine:Testing:Document.Page';
+    protected const PAGE_NODE_TYPE = 'Shel.Neos.Mcp:Testing:Document.Page';
 
     /**
      * The content element with an image, of the tests.
      */
-    protected const IMAGE_NODE_TYPE = 'Sitegeist.SlopMachine:Testing:Content.Image';
+    protected const IMAGE_NODE_TYPE = 'Shel.Neos.Mcp:Testing:Content.Image';
 
     protected ContextFactoryInterface $contextFactory;
     protected NodeTypeManager $nodeTypeManager;

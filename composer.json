@@ -1,6 +1,7 @@
 {
-    "name": "sitegeist/slopmachine",
-    "description": "One of Sitegeist.Pandora's boxes, providing MCP server components for interaction with the Neos Content Repository. Supposedly very powerful, with questionable results",
+    "name": "shel/neos-mcp",
+    "description": "MCP server components for interaction with the Neos Content Repository, built on Sitegeist.Pandora. Gives an AI agent controlled, workspace-safe access to the repository. Supposedly very powerful, with questionable results",
+    "license": "GPL-3.0-or-later",
     "type": "neos-package",
     "config": {
         "vendor-dir": "Packages/Libraries",
@@ -32,17 +33,17 @@
     },
     "autoload": {
         "psr-4": {
-            "Sitegeist\\SlopMachine\\": "Classes/"
+            "Shel\\Neos\\Mcp\\": "Classes/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Sitegeist\\SlopMachine\\Tests\\": "Tests/"
+            "Shel\\Neos\\Mcp\\Tests\\": "Tests/"
         }
     },
     "extra": {
         "neos": {
-            "package-key": "Sitegeist.SlopMachine"
+            "package-key": "Shel.Neos.Mcp"
         }
     },
     "scripts": {

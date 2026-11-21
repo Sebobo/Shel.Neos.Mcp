@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Tests\Functional;
+namespace Shel\Neos\Mcp\Tests\Functional;
 
 use Neos\Flow\Security\Account;
 use Neos\Flow\Security\AccountRepository;
 use Neos\Party\Domain\Service\PartyService;
-use Sitegeist\SlopMachine\Security\AgentAwareUserService;
+use Shel\Neos\Mcp\Security\AgentAwareUserService;
 
 /**
  * The user the policies compare the workspace owner with.

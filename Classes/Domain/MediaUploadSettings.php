@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Neos\Flow\Annotations as Flow;
 
@@ -28,7 +28,7 @@ class MediaUploadSettings
     public const DEFAULT_TAG_LABEL = 'mcp-upload';
 
     /**
-     * @param array<string,mixed> $mediaSettings Sitegeist:SlopMachine:agent:media
+     * @param array<string,mixed> $mediaSettings Shel.Neos.Mcp.agent.media
      */
     public function __construct(
         protected array $mediaSettings,

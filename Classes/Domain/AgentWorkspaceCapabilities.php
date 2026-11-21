@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Capability\Attribute\Schema;
@@ -18,7 +18,7 @@ use Neos\Flow\Annotations as Flow;
 /**
  * Removal, publishing and change management for the agent's own personal workspace.
  *
- * Every context comes from Sitegeist.SlopMachine's MCPContentContextFactory, which always
+ * Every context comes from Shel.Neos.Mcp's MCPContentContextFactory, which always
  * resolves the workspace of the Neos user the agent is assigned to. No argument can select a
  * workspace, so these tools cannot address the live workspace or any other workspace.
  *

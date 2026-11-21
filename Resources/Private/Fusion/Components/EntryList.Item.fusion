@@ -2,7 +2,7 @@
 # An entry in the list: the title, and - for the entries of the configuration - the role they
 # belong to.
 #
-prototype(Sitegeist.SlopMachine:Component.EntryList.Item) < prototype(Neos.Fusion:Component) {
+prototype(Shel.Neos.Mcp:Component.EntryList.Item) < prototype(Neos.Fusion:Component) {
     @propTypes {
         @strict = false
         entry = ${PropTypes.any}
@@ -21,14 +21,14 @@ prototype(Sitegeist.SlopMachine:Component.EntryList.Item) < prototype(Neos.Fusio
     }
 
     renderer = afx`
-        <li class={['slopmachine-instructions-entry', props.entry.id == props.selectedId ? 'selected' : '']}>
+        <li class={['neos-mcp-instructions-entry', props.entry.id == props.selectedId ? 'selected' : '']}>
             <a
                 href={private.selectUri}
                 hx-get={private.selectUri}
-                hx-target="#slopmachine-agent-instructions"
+                hx-target="#neos-mcp-agent-instructions"
                 hx-swap="outerHTML"
             >{props.entry.title}</a>
-            <span class="slopmachine-instructions-entry-role">{props.entry.role}</span>
+            <span class="neos-mcp-instructions-entry-role">{props.entry.role}</span>
         </li>
     `
 }

@@ -7,19 +7,19 @@ Neos:
           # the administrators of the installation write themselves.
           agentinstructions:
             label: 'Agent instructions'
-            controller: 'Sitegeist\SlopMachine\Controller\AgentInstructionsController'
+            controller: 'Shel\Neos\Mcp\Controller\AgentInstructionsController'
             description: 'The instructions the MCP agents are told'
             icon: 'fas fa-robot'
             mainStylesheet: 'Lite'
-            privilegeTarget: 'Sitegeist.SlopMachine:Backend.AgentInstructions'
+            privilegeTarget: 'Shel.Neos.Mcp:Backend.AgentInstructions'
             additionalResources:
               styleSheets:
-                - 'resource://Sitegeist.SlopMachine/Public/Styles/Module.css'
+                - 'resource://Shel.Neos.Mcp/Public/Styles/Module.css'
               javaScripts:
-                - 'resource://Sitegeist.SlopMachine/Public/Scripts/htmx.min.js'
+                - 'resource://Shel.Neos.Mcp/Public/Scripts/htmx.min.js'
 
     userInterface:
       translation:
         autoInclude:
-          Sitegeist.SlopMachine:
+          Shel.Neos.Mcp:
             - 'Main'

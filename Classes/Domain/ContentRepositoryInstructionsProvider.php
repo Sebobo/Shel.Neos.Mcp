@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Neos\ContentRepository\Domain\Service\ContentDimensionPresetSourceInterface;
 use Sitegeist\Pandora\Instruction\InstructionsProvider;

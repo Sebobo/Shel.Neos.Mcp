@@ -12,10 +12,10 @@
 # The last type stays outside the exposed set - it is what the tests use to check that a
 # create command naming a type the schema does not list is rejected.
 
-'Sitegeist.SlopMachine:Testing:Document.Page':
+'Shel.Neos.Mcp:Testing:Document.Page':
   superTypes:
     'Neos.Neos:Document': true
-    'Sitegeist.SlopMachine:Mixin.MCPExposed': true
+    'Shel.Neos.Mcp:Mixin.MCPExposed': true
   properties:
     title:
       type: string
@@ -23,18 +23,18 @@
     main:
       type: 'Neos.Neos:ContentCollection'
 
-'Sitegeist.SlopMachine:Testing:Content.Text':
+'Shel.Neos.Mcp:Testing:Content.Text':
   superTypes:
     'Neos.Neos:Content': true
-    'Sitegeist.SlopMachine:Mixin.MCPExposed': true
+    'Shel.Neos.Mcp:Mixin.MCPExposed': true
   properties:
     text:
       type: string
 
-'Sitegeist.SlopMachine:Testing:Content.Image':
+'Shel.Neos.Mcp:Testing:Content.Image':
   superTypes:
     'Neos.Neos:Content': true
-    'Sitegeist.SlopMachine:Mixin.MCPExposed': true
+    'Shel.Neos.Mcp:Mixin.MCPExposed': true
   properties:
     image:
       type: 'Neos\Media\Domain\Model\ImageInterface'
@@ -43,7 +43,7 @@
     title:
       type: string
 
-'Sitegeist.SlopMachine:Testing:Unexposed':
+'Shel.Neos.Mcp:Testing:Unexposed':
   properties:
     title:
       type: string

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-    <file original="" product="Sitegeist.SlopMachine" source-language="en" target-language="de" datatype="plaintext">
+    <file original="" product="Shel.Neos.Mcp" source-language="en" target-language="de" datatype="plaintext">
         <body>
             <trans-unit id="module.headline">
                 <source>Instructions of the agents</source>
@@ -11,8 +11,8 @@
                 <target>Eigene Einträge werden dem Agenten als ein Block nach den für seine Rolle konfigurierten Anweisungen geschickt.</target>
             </trans-unit>
             <trans-unit id="module.hintNotSent">
-                <source>Your own entries are not sent to any agent: the provider that reads them is not configured for a role. Register "Sitegeist\SlopMachine\Domain\AdditionalInstructionsProvider" in the instructions of the role of the agent.</source>
-                <target>Eigene Einträge werden keinem Agenten geschickt: Der Provider, der sie liest, ist für keine Rolle konfiguriert. Registrieren Sie "Sitegeist\SlopMachine\Domain\AdditionalInstructionsProvider" bei den Anweisungen der Rolle des Agenten.</target>
+                <source>Your own entries are not sent to any agent: the provider that reads them is not configured for a role. Register "Shel\Neos\Mcp\Domain\AdditionalInstructionsProvider" in the instructions of the role of the agent.</source>
+                <target>Eigene Einträge werden keinem Agenten geschickt: Der Provider, der sie liest, ist für keine Rolle konfiguriert. Registrieren Sie "Shel\Neos\Mcp\Domain\AdditionalInstructionsProvider" bei den Anweisungen der Rolle des Agenten.</target>
             </trans-unit>
             <trans-unit id="list.add">
                 <source>Add entry</source>

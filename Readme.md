@@ -26,7 +26,7 @@ address the live workspace or the workspace of another agent.
 ## Installation
 
 ```console
-composer require sitegeist/slopmachine
+composer require shel/neos-mcp
 ```
 
 The package pulls in `sitegeist/pandora`, the MCP server for Neos Flow, which exposes the
@@ -50,15 +50,16 @@ user, and the additional instructions the administrators write:
 ### 1. The shared review workspace
 
 The workspace the agent hands its work over to. Its **name** goes into the settings - Neos
-generates names like `ki-review-r1bxn` for a workspace titled "KI Review", and the content
+generates names like `ki-review-a1b2c` for a workspace titled "KI Review", and the content
 repository addresses workspaces by name:
 
 ```yaml
 # Configuration/Settings.yaml
-Sitegeist:
-  SlopMachine:
-    agent:
-      sharedWorkspace: 'ki-review-r1bxn'
+Shel:
+  Neos:
+    Mcp:
+      agent:
+        sharedWorkspace: 'ki-review-a1b2c'
 ```
 
 The workspace is created by the command of the package, which reads the name from the
@@ -78,7 +79,7 @@ publishes anything itself.
 ```
 
 The command creates the user `mcp-agent` if it does not exist yet, assigns the role
-`Sitegeist.SlopMachine:McpAgent` to it, and bases its personal workspace on the shared review
+`Shel.Neos.Mcp:McpAgent` to it, and bases its personal workspace on the shared review
 workspace - only then does the agent see what the humans are reviewing, and its own diff is
 exactly the handover diff.
 
@@ -161,8 +162,8 @@ capabilities itself:
 
 | Role | What it grants |
 | --- | --- |
-| `Sitegeist.SlopMachine:McpAgent` | the read-only baseline: everything that only reads |
-| `Sitegeist.SlopMachine:McpAgentWithWriteAccess` | the baseline plus the capabilities that create, change or remove content |
+| `Shel.Neos.Mcp:McpAgent` | the read-only baseline: everything that only reads |
+| `Shel.Neos.Mcp:McpAgentWithWriteAccess` | the baseline plus the capabilities that create, change or remove content |
 
 An installation that lets its agent write grants the second one - either directly, or through
 a role of its own that inherits from it:
@@ -177,11 +178,11 @@ roles:
     # from Neos.Neos:RestrictedEditor, which grants the access to the internal workspaces - the
     # shared review workspace and the topic workspaces - and nothing else, so a leaked token
     # does not become a backend editor.
-    parentRoles: ['Sitegeist.SlopMachine:McpAgentWithWriteAccess']
+    parentRoles: ['Shel.Neos.Mcp:McpAgentWithWriteAccess']
 ```
 
 An installation that wants the agent to read and nothing else inherits from
-`Sitegeist.SlopMachine:McpAgent` instead. A role of its own is only needed when the agent
+`Shel.Neos.Mcp:McpAgent` instead. A role of its own is only needed when the agent
 shall have more or less than the package grants - for example when the agent may not remove
 content, in which case the writing capabilities are granted one by one, as the header of the
 `Policy.yaml` of the package lists them.
@@ -192,7 +193,7 @@ roles:
   'Acme.Ai:McpAgent':
     label: 'MCP Agent'
     description: 'Lets a token-authenticated agent drive the content repository over /mcp'
-    parentRoles: ['Sitegeist.SlopMachine:McpAgent']
+    parentRoles: ['Shel.Neos.Mcp:McpAgent']
     privileges:
       # No login with a password: the agent is authenticated by a bearer token.
       - privilegeTarget: 'Neos.Neos:BackendLogin'
@@ -208,13 +209,13 @@ roles:
         permission: GRANT
 
       # Reading
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-children'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-children'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-descendants'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-descendants'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.find-subtree'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-subtree'
         permission: GRANT
-      - privilegeTarget: 'Sitegeist.SlopMachine:Capability.Tool.dimensionspace'
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.dimensionspace'
         permission: GRANT
       # ... one entry per capability, see ./flow capability:list
 ```
@@ -255,7 +256,7 @@ Neos:
   Flow:
     aop:
       globalObjects:
-        userInformation: Sitegeist\SlopMachine\Security\AgentAwareUserService
+        userInformation: Shel\Neos\Mcp\Security\AgentAwareUserService
 ```
 
 The service answers with the user the agent is assigned to when the current account is a token
@@ -322,8 +323,8 @@ Sitegeist:
   Pandora:
     instructions:
       'Acme.Ai:McpAgent':
-        contentRepository: 'Sitegeist\SlopMachine\Domain\ContentRepositoryInstructionsProvider'
-        sharedWorkspaces: 'Sitegeist\SlopMachine\Domain\SharedWorkspaceInstructionsProvider'
+        contentRepository: 'Shel\Neos\Mcp\Domain\ContentRepositoryInstructionsProvider'
+        sharedWorkspaces: 'Shel\Neos\Mcp\Domain\SharedWorkspaceInstructionsProvider'
 ```
 
 The administrators of the installation add their own instructions in the backend module
@@ -355,11 +356,11 @@ the boundary finer - that is a project of its own.
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `Sitegeist:SlopMachine:agent:sharedWorkspace` | `~` | the name of the workspace the agent hands its work over to; unset disables the shared workspace tools |
-| `Sitegeist:SlopMachine:agent:media:collectionTitle` | `MCP Uploads` | the asset collection every upload goes into |
-| `Sitegeist:SlopMachine:agent:media:maxFileSize` | `5242880` | the largest accepted upload, in bytes |
-| `Sitegeist:SlopMachine:agent:media:allowedMediaTypes` | images and PDF | the media types that may be uploaded |
-| `Sitegeist:SlopMachine:agent:media:tagLabel` | `mcp-upload` | the tag every upload carries, so agent uploads are easy to find |
+| `Shel.Neos.Mcp.agent.sharedWorkspace` | `~` | the name of the workspace the agent hands its work over to; unset disables the shared workspace tools |
+| `Shel.Neos.Mcp.agent.media.collectionTitle` | `MCP Uploads` | the asset collection every upload goes into |
+| `Shel.Neos.Mcp.agent.media.maxFileSize` | `5242880` | the largest accepted upload, in bytes |
+| `Shel.Neos.Mcp.agent.media.allowedMediaTypes` | images and PDF | the media types that may be uploaded |
+| `Shel.Neos.Mcp.agent.media.tagLabel` | `mcp-upload` | the tag every upload carries, so agent uploads are easy to find |
 
 ## Development
 
@@ -375,7 +376,7 @@ Neos** decide what the agent may do. They need an installation with Neos - a Flo
 is not enough, because the content repository and the node types come with Neos:
 
 ```console
-FLOW_CONTEXT=Testing bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/Sitegeist.SlopMachine/Tests/Functional/
+FLOW_CONTEXT=Testing bin/phpunit --colors -c Build/BuildEssentials/PhpUnit/FunctionalTests.xml Packages/Application/Shel.Neos.Mcp/Tests/Functional/
 ```
 
 What they hold:
@@ -391,5 +392,17 @@ What they hold:
 
 A new capability is a class with an `#[McpTool]` attribute in `Classes/Domain`. It is
 discovered automatically, and it gets a privilege target
-`Sitegeist.SlopMachine:Capability.Tool.<the name of the tool>` - which has to be granted in the
+`Shel.Neos.Mcp:Capability.Tool.<the name of the tool>` - which has to be granted in the
 `Policy.yaml` of the installation, or the tool stays hidden.
+
+## Fork and license
+
+This package is a fork of [Sitegeist.SlopMachine](https://github.com/sitegeist/Sitegeist.SlopMachine)
+by Sitegeist GmbH, published under GPL-3.0-or-later, whose complete license text ships in the
+`LICENSE` file. The fork is maintained by Sebastian Helzle and started from the upstream version
+at commit `d33ec34` (2026-08-11). It has been substantially modified since - the git history of
+this repository carries the original upstream history, so the authorship of every part remains
+traceable.
+
+It depends on [Sitegeist.Pandora](https://github.com/sitegeist/Sitegeist.Pandora), the MCP server
+integration for Neos Flow, which is likewise GPL-3.0-or-later and stays untouched by this fork.

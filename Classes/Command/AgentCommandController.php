@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Command;
+namespace Shel\Neos\Mcp\Command;
 
 use Neos\ContentRepository\Domain\Model\Workspace;
 use Neos\ContentRepository\Domain\Repository\WorkspaceRepository;
@@ -12,9 +12,9 @@ use Neos\Flow\Security\Exception\NoSuchRoleException;
 use Neos\Neos\Domain\Model\User;
 use Neos\Neos\Domain\Service\UserService;
 use Neos\Neos\Utility\User as UserUtility;
-use Sitegeist\SlopMachine\Domain\Model\AgentAssignment;
-use Sitegeist\SlopMachine\Domain\Repository\AgentAssignmentRepository;
-use Sitegeist\SlopMachine\Domain\SharedWorkspaceContextFactory;
+use Shel\Neos\Mcp\Domain\Model\AgentAssignment;
+use Shel\Neos\Mcp\Domain\Repository\AgentAssignmentRepository;
+use Shel\Neos\Mcp\Domain\SharedWorkspaceContextFactory;
 
 class AgentCommandController extends CommandController
 {
@@ -22,7 +22,7 @@ class AgentCommandController extends CommandController
      * The role of the AI agent, defined in the Policy.yaml of this package: a restricted editor
      * that may read the content repository over MCP, and whose backend login is denied.
      */
-    public const AGENT_ROLE_IDENTIFIER = 'Sitegeist.SlopMachine:McpAgent';
+    public const AGENT_ROLE_IDENTIFIER = 'Shel.Neos.Mcp:McpAgent';
 
     /**
      * The name of the AI agent account, unless another one is passed to the command.
@@ -62,7 +62,7 @@ class AgentCommandController extends CommandController
     /**
      * Creates the shared review workspace the agent hands its work over to, if it does not exist yet.
      *
-     * The name is the one configured in Sitegeist.SlopMachine.agent.sharedWorkspace - the very
+     * The name is the one configured in Shel.Neos.Mcp.agent.sharedWorkspace - the very
      * workspace the agent's tools address - so the command cannot set up a workspace the agent
      * would not use. Pass a name explicitly to create a different one.
      *
@@ -140,7 +140,7 @@ class AgentCommandController extends CommandController
             $this->assignAgentRole($user, $username);
         } catch (NoSuchRoleException) {
             $this->outputLine(
-                '<error>The role "%s" does not exist: it is defined in the Policy.yaml of the Sitegeist.SlopMachine package,'
+                '<error>The role "%s" does not exist: it is defined in the Policy.yaml of the Shel.Neos.Mcp package,'
                 . ' so the policy has to be reloaded first ("flow:cache:flush").</error>',
                 [self::AGENT_ROLE_IDENTIFIER]
             );

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Tests\Functional;
+namespace Shel\Neos\Mcp\Tests\Functional;
 
 use Neos\ContentRepository\Domain\Model\Node;
 use Neos\Flow\Security\Exception\AccessDeniedException;
-use Sitegeist\SlopMachine\Domain\Repository\AgentAssignmentRepository;
+use Shel\Neos\Mcp\Domain\Repository\AgentAssignmentRepository;
 
 /**
  * The workspaces the agent may reach, and the ones it may not.
