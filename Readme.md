@@ -406,3 +406,16 @@ traceable.
 
 It depends on [Sitegeist.Pandora](https://github.com/sitegeist/Sitegeist.Pandora), the MCP server
 integration for Neos Flow, which is likewise GPL-3.0-or-later and stays untouched by this fork.
+
+## Upgrading from Sitegeist.SlopMachine
+
+1. Replace `sitegeist/slopmachine` with `shel/neos-mcp` in the `composer.json` of the project and
+   of every package that requires it, then run `composer update`.
+2. Run `./flow core:migrate --package-key <Your.Project.Package>` for every package that references
+   the old one: the core migration of this package renames the package key, the class names, the
+   roles and node types and moves the settings to the new path.
+3. Run `./flow doctrine:migrate`: the database migration of this package renames the
+   `sitegeist_slopmachine_*` tables to `shel_neos_mcp_*`, or creates them where an installation has
+   none.
+4. Adjust the role identifiers stored in the database by hand - the assignments of the accounts and
+   the role names of the authentication tokens still name `Sitegeist.SlopMachine:McpAgent*`.

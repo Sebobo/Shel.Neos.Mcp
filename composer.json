@@ -21,6 +21,9 @@
         "mcp/sdk": "^0.7.0",
         "sitegeist/pandora": "*"
     },
+    "conflict": {
+        "sitegeist/slopmachine": "*"
+    },
     "require-dev": {
         "neos/buildessentials": "^8.3",
         "mikey179/vfsstream": "^1.6",
