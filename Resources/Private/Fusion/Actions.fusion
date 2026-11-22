@@ -1,0 +1,18 @@
+#
+# The actions of the backend module of the agents.
+#
+# Every action renders the whole module: the list of the entries is on the left, the details
+# of the selected entry on the right. The parts are exchanged with htmx, so the module is
+# replaced as a whole - the state of the module (which entry is selected, whether a form is
+# open) is kept by the controller, not by the browser.
+#
+Shel.Neos.Mcp.AgentInstructionsController {
+    index = Shel.Neos.Mcp:Views.Module
+    select = Shel.Neos.Mcp:Views.Module
+    new = Shel.Neos.Mcp:Views.Module
+    edit = Shel.Neos.Mcp:Views.Module
+    create = Shel.Neos.Mcp:Views.Module
+    update = Shel.Neos.Mcp:Views.Module
+    delete = Shel.Neos.Mcp:Views.Module
+    move = Shel.Neos.Mcp:Views.Module
+}

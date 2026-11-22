@@ -2,26 +2,31 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Capability\Attribute\Schema;
 use Mcp\Schema\ToolAnnotations;
 use Neos\ContentRepository\Domain\Model\Node;
+use Neos\ContentRepository\Domain\Model\NodeType;
 use Neos\ContentRepository\Domain\Service\NodeTypeManager;
 use Neos\ContentRepository\Domain\Utility\NodePaths;
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Property\PropertyMapper;
-use Neos\Flow\Security\Context as SecurityContext;
+use Neos\Neos\Domain\Service\ContentContext;
 
 #[Flow\Proxy(false)]
 class ContentRepositoryWritingCapabilities
 {
+    use PropertyValueConversionTrait;
+    use NodeStatePropertyTrait;
+
     public function __construct(
         protected MCPContentContextFactory $contentContextFactory,
         protected NodeTypeManager $nodeTypeManager,
-        protected SecurityContext $securityContext,
         protected PropertyMapper $propertyMapper,
+        protected NodePropertyValidation $nodePropertyValidation,
+        protected ExposedNodeTypes $exposedNodeTypes,
     ) {
     }
 
@@ -127,6 +132,7 @@ class ContentRepositoryWritingCapabilities
 
     /**
      * @param array<int,array<string,mixed>> $commands
+     * @return array<string,mixed>
      */
     #[McpTool(
         name: 'BulkWriting',
@@ -134,9 +140,12 @@ class ContentRepositoryWritingCapabilities
             Use this if you want to e.g. create a completely new page and add its content in one batch.
             Commands must be sent as objects, not as JSON strings.
             Each command must define its `type` (CreateNodeAggregateWithNode, SetNodeProperties, SetNodeReferences) and has the same properties as the corresponding tools.
-            An example command would be {"type": "SetNodeProperties", "nodeAggregateId": "8a887309-5803-458d-b30a-40736f5a5d82", "originDimensionSpacePoint": {"language":"de"}, "propertyValues": {"title": "My Title"}}
+            The originDimensionSpacePoint of each command must be a dimension space point this installation allows; call the dimensionspace tool once to get the points you can use and pass the same one to every command of a batch. An empty object {} is the correct value for an installation without content dimensions.
+            An example command would be {"type": "SetNodeProperties", "nodeAggregateId": "8a887309-5803-458d-b30a-40736f5a5d82", "originDimensionSpacePoint": {}, "propertyValues": {"title": "My Title"}}
+            A command that names a node or parent that does not exist, or a node type that is not allowed there, is reported as failed with that reason; the same holds for a create command that names an abstract node type or a type outside the node type schema, because only a concrete type the schema lists can be created. Commands that already succeeded stay applied.
             The commands are unserialized along with the `commands` parameter and must not be double encoded.
-            Returns a list of command results, one per issued command in correct order.
+            Returns an object with the outcome of the batch: `successCount`, `failureCount` and `results`,
+            where `results` holds one entry per issued command in the order the commands were sent.
             This tool does not work transactionally, commands that succeeded have been applied and can be considered as much for the current content graph state.
             If more than one write operation is required, always prefer this tool.
             Single-operation tools (CreateNodeAggregateWithNode, SetNodeProperties, SetNodeReferences) are only allowed if:
@@ -197,7 +206,16 @@ class ContentRepositoryWritingCapabilities
             };
         }
 
-        return $result;
+        // The result is an object, not a list: the MCP specification defines the structured
+        // content of a tool result as a JSON object, and a client that validates against the
+        // specification rejects a list as "expected record, received array".
+        $successCount = \count(\array_filter($result, static fn (array $entry): bool => $entry['success'] ?? false));
+
+        return [
+            'successCount' => $successCount,
+            'failureCount' => \count($result) - $successCount,
+            'results' => $result,
+        ];
     }
 
     /**
@@ -218,63 +236,58 @@ class ContentRepositoryWritingCapabilities
     ): array {
         $contentContext = $this->contentContextFactory->getWritingContentContext($originDimensionSpacePoint);
         $result = [];
-        $this->securityContext->withoutAuthorizationChecks(
-            function() use(
-                $nodeTypeName,
-                $contentContext,
-                $parentNodeAggregateId,
-                $initialPropertyValues,
+        try {
+            $parentNode = $this->requireNode($contentContext, $parentNodeAggregateId);
+            $nodeType = $this->nodeTypeManager->getNodeType($nodeTypeName);
+            // Before the node exists, and before the values: the content repository does not
+            // guard against abstract or unexposed types on the write path, so this tool is
+            // the place where "you can only create what the schema lists" has to hold.
+            $this->requireCreatableNodeType($nodeType);
+            $this->requireValidPropertyValues($nodeType, $initialPropertyValues);
+            /** @var Node $createdNode */
+            $createdNode = $parentNode->createNode(
+                $nodeName ?: NodePaths::generateRandomNodeName(),
+                $nodeType,
                 $nodeAggregateId,
-                $succeedingSiblingNodeAggregateId,
-                $nodeName,
-                $references,
-                &$result,
-            ) {
-                try {
-                    $parentNode = $contentContext->getNodeByIdentifier($parentNodeAggregateId);
-                    /** @var Node $createdNode */
-                    $createdNode = $parentNode->createNode(
-                        $nodeName ?: NodePaths::generateRandomNodeName(),
-                        $this->nodeTypeManager->getNodeType($nodeTypeName),
-                        $nodeAggregateId,
-                    );
-                    $nodeType = $this->nodeTypeManager->getNodeType($nodeTypeName);
-                    if ($initialPropertyValues !== []) {
-                        $this->setProperties($createdNode, $initialPropertyValues);
-                    }
-                    if ($references !== []) {
-                        $this->setReferences($createdNode, $references);
-                    }
-                    if ($succeedingSibling = $succeedingSiblingNodeAggregateId ? $contentContext->getNodeByIdentifier($succeedingSiblingNodeAggregateId) : null) {
-                        $createdNode->moveBefore($succeedingSibling);
-                    }
-                    $tetheredDescendantIds = [];
-                    foreach ($nodeType->getAutoCreatedChildNodes() as $nodeName => $tetheredNodeType) {
-                        $tetheredDescendantIds[$nodeName] = $createdNode->getNode($nodeName)->getIdentifier();
-                    }
-
-                    $payload = [
-                        'success' => true,
-                        'nodeAggregateId' => $createdNode->getIdentifier(),
-                        'nodeName' => $createdNode->getName(),
-                        'tetheredDescendantAggregateIds' => $tetheredDescendantIds,
-                    ];
-
-                    $result = [
-                        'content' => [
-                            'type' => 'text',
-                            'text' => \json_encode($payload),
-                        ],
-                        'structuredContent' => $payload,
-                    ];
-                } catch (\Throwable $exception) {
-                    $result = [
-                        'success' => false,
-                        'message' => $exception->getMessage(),
-                    ];
-                }
+            );
+            if ($initialPropertyValues !== []) {
+                $this->setProperties($createdNode, $initialPropertyValues);
             }
-        );
+            if ($references !== []) {
+                $this->setReferences($createdNode, $references);
+            }
+            if ($succeedingSibling = $succeedingSiblingNodeAggregateId ? $contentContext->getNodeByIdentifier($succeedingSiblingNodeAggregateId) : null) {
+                $createdNode->moveBefore($succeedingSibling);
+            }
+            $tetheredDescendantIds = [];
+            foreach ($nodeType->getAutoCreatedChildNodes() as $nodeName => $tetheredNodeType) {
+                // The node has already been created at this point, so a tethered child that
+                // cannot be resolved is reported as missing instead of failing the whole
+                // command: reporting a failure would invite a retry that creates a duplicate.
+                $tetheredNode = $createdNode->getNode($nodeName);
+                $tetheredDescendantIds[$nodeName] = $tetheredNode?->getIdentifier();
+            }
+
+            $payload = [
+                'success' => true,
+                'nodeAggregateId' => $createdNode->getIdentifier(),
+                'nodeName' => $createdNode->getName(),
+                'tetheredDescendantAggregateIds' => $tetheredDescendantIds,
+            ];
+            $this->reportEffectivePropertyValues($createdNode, $initialPropertyValues, $payload);
+
+            // The payload is the entry of a list of command results, not a tool result
+            // of its own, so it is returned flat. Wrapping it in a tool result envelope
+            // would hide the success flag one level deeper than in every other command
+            // result of this tool, and the shared workspace variant of this bulk write
+            // returns it flat as well.
+            $result = $payload;
+        } catch (\Throwable $exception) {
+            $result = [
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ];
+        }
 
         return $result;
     }
@@ -291,30 +304,23 @@ class ContentRepositoryWritingCapabilities
     ): array {
         $contentContext = $this->contentContextFactory->getWritingContentContext($originDimensionSpacePoint);
         $result = [];
-        $this->securityContext->withoutAuthorizationChecks(
-            function() use(
-                $nodeAggregateId,
-                $contentContext,
-                $propertyValues,
-                &$result,
-            ) {
-                try {
-                    /** @var Node $node */
-                    $node = $contentContext->getNodeByIdentifier($nodeAggregateId);
-                    $this->setProperties($node, $propertyValues);
+        try {
+            $node = $this->requireNode($contentContext, $nodeAggregateId);
+            $this->requireValidPropertyValues($node->getNodeType(), $propertyValues);
+            $this->setProperties($node, $propertyValues);
 
-                    $result = [
-                        'success' => true,
-                        'message' => null,
-                    ];
-                } catch (\Throwable $exception) {
-                    $result = [
-                        'success' => false,
-                        'message' => $exception->getMessage(),
-                    ];
-                }
-            }
-        );
+            $result = [
+                'success' => true,
+                'message' => null,
+                'nodeAggregateId' => $nodeAggregateId,
+            ];
+            $this->reportEffectivePropertyValues($node, $propertyValues, $result);
+        } catch (\Throwable $exception) {
+            $result = [
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ];
+        }
 
         return $result;
     }
@@ -331,32 +337,40 @@ class ContentRepositoryWritingCapabilities
     ): array {
         $contentContext = $this->contentContextFactory->getWritingContentContext($originDimensionSpacePoint);
         $result = [];
-        $this->securityContext->withoutAuthorizationChecks(
-            function() use(
-                $nodeAggregateId,
-                $contentContext,
-                $references,
-                &$result,
-            ) {
-                try {
-                    /** @var Node $node */
-                    $node = $contentContext->getNodeByIdentifier($nodeAggregateId);
-                    $this->setReferences($node, $references);
+        try {
+            $node = $this->requireNode($contentContext, $nodeAggregateId);
+            $this->setReferences($node, $references);
 
-                    $result = [
-                        'success' => true,
-                        'message' => null,
-                    ];
-                } catch (\Throwable $exception) {
-                    $result = [
-                        'success' => false,
-                        'message' => $exception->getMessage(),
-                    ];
-                }
-            }
-        );
+            $result = [
+                'success' => true,
+                'message' => null,
+                'nodeAggregateId' => $nodeAggregateId,
+            ];
+        } catch (\Throwable $exception) {
+            $result = [
+                'success' => false,
+                'message' => $exception->getMessage(),
+            ];
+        }
 
         return $result;
+    }
+
+    /**
+     * @param array<string,mixed> $properties
+     */
+    /**
+     * Resolves a node aggregate id, failing with a readable message rather than letting a null node
+     * reach the content repository and surface as a low level error.
+     */
+    private function requireNode(ContentContext $contentContext, string $nodeAggregateId): Node
+    {
+        $node = $contentContext->getNodeByIdentifier($nodeAggregateId);
+        if (!$node instanceof Node) {
+            throw new \RuntimeException('No node found for nodeAggregateId ' . $nodeAggregateId . '.');
+        }
+
+        return $node;
     }
 
     /**
@@ -366,15 +380,118 @@ class ContentRepositoryWritingCapabilities
     {
         $nodeType = $node->getNodeType();
         foreach ($properties as $propertyName => $propertyValue) {
+            if ($this->isNodeStateProperty($propertyName)) {
+                $this->setNodeStateProperty($node, $propertyName, $propertyValue);
+                continue;
+            }
             $expectedType = $nodeType->getPropertyType($propertyName);
             if ($expectedType === 'reference' || $expectedType === 'references') {
                 throw new \Exception('References must be set as references, not properties.');
             }
-            if (class_exists($expectedType) && !$propertyValue instanceof $expectedType) {
-                $propertyValue = $this->propertyMapper->convert($propertyValue, $expectedType);
-            }
+            $propertyValue = $this->convertPropertyValue($propertyName, $expectedType, $propertyValue);
             $node->setProperty($propertyName, $propertyValue);
         }
+    }
+
+    /**
+     * Rejects a create command that names a type the agent may not instantiate.
+     *
+     * The old content repository does not enforce abstractness anywhere on the write path -
+     * the editor UI only hides abstract types from the creation dialog - and it knows nothing
+     * of the exposed set, so both rules live here. The message keeps the two cases apart,
+     * because an abstract type is not a mistake of vocabulary but of the verb: it stays a
+     * valid filter for the read tools.
+     */
+    private function requireCreatableNodeType(NodeType $nodeType): void
+    {
+        if ($nodeType->isAbstract()) {
+            throw new \RuntimeException(\sprintf(
+                'Node type %s is abstract and can never be instantiated. Abstract types are valid as filters of the read tools, but a node has to be created from a concrete type listed by the node type schema.',
+                $nodeType->getName()
+            ));
+        }
+        if (!$this->exposedNodeTypes->isCreatable($nodeType)) {
+            throw new \RuntimeException(\sprintf(
+                'Node type %s is not exposed to MCP and cannot be created. Say so instead of guessing a name; the nodetype-basic-schema tool lists the types you can create.',
+                $nodeType->getName()
+            ));
+        }
+    }
+
+    /**
+     * Rejects a write whose values violate a validator declared by the node type.
+     *
+     * The content repository does not validate property values - it casts a value to the
+     * declared property type and stops - and neither did this tool. A value the Neos UI would
+     * refuse to save was therefore stored without complaint and only surfaced later, when a
+     * human opened the node in the editor and could not save it.
+     *
+     * @param array<string,mixed> $propertyValues
+     */
+    private function requireValidPropertyValues(NodeType $nodeType, array $propertyValues): void
+    {
+        $violations = $this->nodePropertyValidation->violations($nodeType, $propertyValues);
+        if ($violations === []) {
+            return;
+        }
+
+        throw new \RuntimeException(\sprintf(
+            'The property values do not satisfy the validators of node type %s: %s',
+            $nodeType->getName(),
+            \implode(' ', $violations),
+        ));
+    }
+
+    /**
+     * Property values can be stored differently than requested: a node type or a Neos
+     * signal may adjust a value while it is being set, and values can be cast by the
+     * property mapper. The best known case is the uriPathSegment of a document, which
+     * Neos makes unique among its sibling documents - counting removed siblings as well -
+     * so a requested value can come back with a numeric suffix. It is not the only case,
+     * so the comparison is made for every scalar value.
+     *
+     * The message states the difference without naming a cause, because the caller cannot
+     * know one; the tool description names the known cases. The result array is only
+     * extended when a value actually differs, so responses stay unchanged in the regular
+     * case.
+     *
+     * @param array<string,mixed> $requestedValues
+     * @param array<string,mixed> $result the payload to extend, passed by reference
+     */
+    private function reportEffectivePropertyValues(Node $node, array $requestedValues, array &$result): void
+    {
+        $differences = [];
+        $effectiveValues = [];
+        foreach ($requestedValues as $propertyName => $requestedValue) {
+            $effectiveValue = $this->isNodeStateProperty($propertyName)
+                ? $this->getNodeStateProperty($node, $propertyName)
+                : $node->getProperty($propertyName);
+            // Assets, dates and other objects can neither be compared here nor serialised
+            // into the response, so only scalar values take part in the comparison.
+            if (!is_scalar($effectiveValue) && $effectiveValue !== null) {
+                continue;
+            }
+            if (!is_scalar($requestedValue) && $requestedValue !== null) {
+                continue;
+            }
+            $effectiveValues[$propertyName] = $effectiveValue;
+            if ($effectiveValue !== $requestedValue) {
+                $differences[] = sprintf(
+                    '%s: requested "%s", stored "%s"',
+                    $propertyName,
+                    $requestedValue,
+                    $effectiveValue
+                );
+            }
+        }
+
+        if ($differences === []) {
+            return;
+        }
+
+        $result['message'] = 'The node stored different values than requested: '
+            . implode('; ', $differences) . '.';
+        $result['effectivePropertyValues'] = $effectiveValues;
     }
 
     /**

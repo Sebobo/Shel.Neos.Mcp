@@ -1,0 +1,25 @@
+Neos:
+  Neos:
+    modules:
+      administration:
+        submodules:
+          # The module of the agents: the instructions the agents are told, and the entries
+          # the administrators of the installation write themselves.
+          agentinstructions:
+            label: 'Agent instructions'
+            controller: 'Shel\Neos\Mcp\Controller\AgentInstructionsController'
+            description: 'The instructions the MCP agents are told'
+            icon: 'fas fa-robot'
+            mainStylesheet: 'Lite'
+            privilegeTarget: 'Shel.Neos.Mcp:Backend.AgentInstructions'
+            additionalResources:
+              styleSheets:
+                - 'resource://Shel.Neos.Mcp/Public/Styles/Module.css'
+              javaScripts:
+                - 'resource://Shel.Neos.Mcp/Public/Scripts/htmx.min.js'
+
+    userInterface:
+      translation:
+        autoInclude:
+          Shel.Neos.Mcp:
+            - 'Main'

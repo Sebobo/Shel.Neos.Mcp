@@ -1,0 +1,80 @@
+/**
+ * The module of the agents: the entries on the left, the instructions of the selected entry
+ * on the right.
+ */
+
+.neos-mcp-instructions-list h2 {
+    margin-bottom: 0.2em;
+}
+
+.neos-mcp-instructions-list h3 {
+    margin: 1.2em 0 0.3em 0;
+    font-size: 1em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+}
+
+.neos-mcp-instructions-hint {
+    opacity: 0.7;
+    margin-bottom: 1em;
+}
+
+.neos-mcp-instructions-entries {
+    list-style: none;
+    margin: 0 0 0.5em 0;
+    padding: 0;
+}
+
+.neos-mcp-instructions-entry {
+    padding: 0.35em 0.6em;
+    border-left: 3px solid transparent;
+}
+
+.neos-mcp-instructions-entry.selected {
+    border-left-color: #ff8700;
+    background-color: rgba(255, 135, 0, 0.08);
+}
+
+.neos-mcp-instructions-entry a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.neos-mcp-instructions-entry a:hover {
+    text-decoration: underline;
+}
+
+.neos-mcp-instructions-entry-role {
+    display: block;
+    font-size: 0.8em;
+    opacity: 0.6;
+}
+
+.neos-mcp-instructions-meta {
+    opacity: 0.7;
+    font-size: 0.9em;
+}
+
+.neos-mcp-instructions-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 1em;
+    max-height: 55vh;
+    overflow: auto;
+}
+
+.neos-mcp-instructions-actions {
+    margin-top: 1.2em;
+}
+
+.neos-mcp-instructions-actions .neos-button {
+    margin-right: 0.4em;
+}
+
+.neos-mcp-instructions-detail textarea {
+    width: 100%;
+    font-family: monospace;
+}

@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
-use Mcp\Capability\Attribute\McpResource;
 use Mcp\Capability\Attribute\McpTool;
 use Mcp\Schema\ToolAnnotations;
 use Neos\Flow\Annotations as Flow;
@@ -17,15 +16,6 @@ class QueryPatternsCapabilities
     /**
      * @return array<string,mixed>
      */
-    #[McpResource(
-        uri: self::URI,
-        name: 'query-patterns',
-        description: 'Machine-readable guidance for reliable MCP content queries.',
-        meta: [
-            'purpose' => 'query reliability',
-        ],
-    )]
-    /** Also exposed as an MCP search tool so that it can be used by chat clients */
     #[McpTool(
         name: 'query-patterns',
         description: 'Machine-readable guidance for reliable MCP content queries.',
@@ -45,7 +35,7 @@ class QueryPatternsCapabilities
                 [
                     'id' => 'encode-dimension-space-point',
                     'requirement' => 'always',
-                    'message' => 'Dimension space point must be URL-encoded JSON.',
+                    'message' => 'Dimension space point must be URL-encoded JSON, and it must be a point this installation actually allows. Call the dimensionspace tool once before your first query and pass one of the points it reports; do not invent dimension names or values. If the installation defines no content dimensions, the only valid point is an empty object ({}).',
                 ],
                 [
                     'id' => 'prefer-children-over-descendants',
@@ -53,9 +43,14 @@ class QueryPatternsCapabilities
                     'message' => 'Use find-children before find-descendants when parent is known.',
                 ],
                 [
-                    'id' => 'prefer-page-subtree-for-page-checks',
+                    'id' => 'prefer-scoped-tools-over-recursive-scans',
                     'requirement' => 'always',
-                    'message' => 'Use find-subtree as PRIMARY QUERY for content inspection for a single node and a limited set of descendants.',
+                    'message' => 'Use find-content for the content of one document and find-documents for the documents below it, instead of find-descendants. A document owns content of its own and it may also parent other documents, and each of those brings its own content with it - the recursive query mixes both, so on a page with child pages it returns the content of every one of them. find-content returns the content of the document itself, find-documents the documents below it.',
+                ],
+                [
+                    'id' => 'paginate-with-cursor',
+                    'requirement' => 'always',
+                    'message' => 'Every read is capped. When a result reports truncated, send the nextCursor it reports back as the cursor parameter to get the next page. The cursor is a best effort resume position, not a snapshot: nodes that are added to or removed from the subtree in between can change what the next page holds.',
                 ],
                 [
                     'id' => 'use-property-limits',
@@ -65,7 +60,7 @@ class QueryPatternsCapabilities
                 [
                     'id' => 'avoid-wide-descendant-scans',
                     'requirement' => 'avoid',
-                    'message' => 'Avoid broad descendant full-text scans on high-level roots.',
+                    'message' => 'Avoid broad descendant scans on high-level roots - they walk the content of every document below the node. Use find-content and find-documents for a scoped answer.',
                 ],
                 [
                     'id' => 'bulk-writing-command-format',
@@ -86,9 +81,14 @@ class QueryPatternsCapabilities
             'parameterFormats' => [
                 [
                     'parameter' => 'dimensionSpacePoint',
-                    'format' => 'urlencoded-json-object',
+                    'format' => 'object-or-urlencoded-json-object',
+                    'description' => 'A dimension space point as reported by the dimensionspace tool. Both the object form ({language: "de"}, or {} for an installation with no content dimensions) and the URL-encoded JSON string form (%7B%22language%22%3A%22de%22%7D) are accepted everywhere; the URL-encoded form is deprecated but kept for compatibility with the read and site tools. The examples below are illustrations of the encoding only - they are not values this installation necessarily has.',
                     'exampleRaw' => '{"language":"de"}',
                     'exampleEncoded' => '%7B%22language%22%3A%22de%22%7D',
+                    'exampleWhenNoDimensions' => [
+                        'exampleRaw' => '{}',
+                        'exampleEncoded' => '%7B%7D',
+                    ],
                 ],
                 [
                     'parameter' => 'nodeTypeNames',
@@ -111,13 +111,15 @@ class QueryPatternsCapabilities
             ],
             'fallbackSequenceOnReadError' => [
                 'reduce-limitToPropertyNames',
-                'switch-find-descendants-to-find-page-subtree-if-page-known',
+                'switch-find-descendants-to-find-content-if-document-known',
+                'switch-find-descendants-to-find-documents-if-node-known',
                 'switch-find-descendants-to-find-children-if-parent-known',
             ],
             'knownGoodDefaults' => [
                 'nodeTypeName' => '*',
                 'limitToPropertyNames' => 'title,name,abstract,description,uriPathSegment',
                 'searchTerm' => '*',
+                'limit' => 200,
             ],
         ];
 

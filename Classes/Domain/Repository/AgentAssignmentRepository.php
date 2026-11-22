@@ -2,16 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain\Repository;
+namespace Shel\Neos\Mcp\Domain\Repository;
 
 use Neos\Flow\Annotations as Flow;
 use Neos\Flow\Persistence\Doctrine\Repository;
 use Neos\Flow\Security\Context;
-use Sitegeist\SlopMachine\Domain\Model\AgentAssignment;
+use Shel\Neos\Mcp\Domain\Model\AgentAssignment;
 
-/**
- * @method findOneByAgentId(string $agentId): ?AgentAssignment
- */
 #[Flow\Scope('singleton')]
 class AgentAssignmentRepository extends Repository
 {

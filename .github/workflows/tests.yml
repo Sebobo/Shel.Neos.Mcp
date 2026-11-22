@@ -1,0 +1,43 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main]
+
+jobs:
+  codestyle:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['8.4']
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ~/.composer/cache
+          key: dependencies-composer-${{ hashFiles('composer.json') }}
+
+      - name: Install dependencies
+        uses: php-actions/composer@v6
+        with:
+          php_version: ${{ matrix.php-versions }}
+          version: 2
+        env:
+          # the container user does not own the checkout, so composer cannot read the
+          # root package version from git; set it instead of whitelisting the directory
+          COMPOSER_ROOT_VERSION: dev-main
+
+      - name: PHPStan
+        run: bin/phpstan analyse -c phpstan.neon

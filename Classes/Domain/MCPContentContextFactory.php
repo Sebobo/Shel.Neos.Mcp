@@ -2,27 +2,44 @@
 
 declare(strict_types=1);
 
-namespace Sitegeist\SlopMachine\Domain;
+namespace Shel\Neos\Mcp\Domain;
 
-use Neos\ContentRepository\Domain\Service\ContentDimensionPresetSourceInterface;
 use Neos\Flow\Annotations as Flow;
 use Neos\Neos\Domain\Service\ContentContext;
 use Neos\Neos\Domain\Service\ContentContextFactory;
 use Neos\Neos\Domain\Service\UserService;
 use Neos\Neos\Utility\User as UserUtility;
-use Sitegeist\SlopMachine\Domain\Repository\AgentAssignmentRepository;
+use Shel\Neos\Mcp\Domain\Repository\AgentAssignmentRepository;
 
 #[Flow\Scope('singleton')]
 class MCPContentContextFactory
 {
     public function __construct(
         protected ContentContextFactory $contentContextFactory,
-        protected ContentDimensionPresetSourceInterface $contentDimensionPresetSource,
+        protected DimensionSpacePointResolver $dimensionSpacePointResolver,
         protected AgentAssignmentRepository $agentAssignmentRepository,
         protected UserService $userService,
     ) {
     }
 
+
+    /**
+     * Decodes a dimension space point that may arrive as either an object (the shape the
+     * factory expects internally) or a URL-encoded JSON string (the form read and site tools
+     * historically accepted). An empty object {} arrives as an empty PHP array after JSON
+     * decoding, so callers do not have to distinguish empty-object from empty-array input.
+     *
+     * @param string|array<string,string> $dimensionSpacePoint
+     * @return array<string,string>
+     */
+    public static function decodeDimensionSpacePoint(string|array $dimensionSpacePoint): array
+    {
+        if (\is_string($dimensionSpacePoint)) {
+            $decoded = \json_decode(\urldecode($dimensionSpacePoint), true, 512, JSON_THROW_ON_ERROR);
+            return \is_array($decoded) ? $decoded : [];
+        }
+        return $dimensionSpacePoint;
+    }
 
     /**
      * @param array<string,string> $dimensionSpacePoint
@@ -45,10 +62,8 @@ class MCPContentContextFactory
      */
     private function getContentContext(array $dimensionSpacePoint, bool $invisibleContentShown): ContentContext
     {
-        $dimensions = [];
-        foreach ($dimensionSpacePoint as $dimensionName => $dimensionValue) {
-            $dimensions[$dimensionName] = $this->contentDimensionPresetSource->getAllPresets()[$dimensionName]['presets'][$dimensionValue]['values'];
-        }
+        $dimensions = $this->dimensionSpacePointResolver->resolve($dimensionSpacePoint);
+
         /** @var ContentContext $contentContext */
         $contentContext = $this->contentContextFactory->create([
             'workspaceName' => $this->requireWorkspaceName(),

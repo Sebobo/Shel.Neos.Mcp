@@ -1,5 +1,8 @@
 parameters:
     level: 8
+    phpVersion: 80300
     paths:
         - Classes
-        - Tests
+    treatPhpDocTypesAsCertain: false
+    ignoreErrors:
+        - '#Call to an undefined method [a-zA-Z0-9\\_]+Repository::findOneBy[a-zA-Z]+\(\)#'

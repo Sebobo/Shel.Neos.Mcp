@@ -1,0 +1,38 @@
+#
+# The right side of the module: the instructions of the selected entry, or the form of an
+# entry that is written.
+#
+prototype(Shel.Neos.Mcp:Component.EntryDetail) < prototype(Neos.Fusion:Component) {
+    @propTypes {
+        @strict = false
+        selectedEntry = ${PropTypes.any}
+        form = ${PropTypes.any}
+    }
+
+    selectedEntry = ${selectedEntry}
+    form = ${form}
+
+    @private {
+        i18n = ${I18n.id('').source('Main').package('Shel.Neos.Mcp')}
+    }
+
+    renderer = Neos.Fusion:Match {
+        @subject = ${props.form != null ? 'form' : (props.selectedEntry != null ? 'entry' : 'empty')}
+        @default = afx``
+        empty = afx`
+            <div class="neos-mcp-instructions-detail">
+                <p class="neos-mcp-instructions-hint">{private.i18n.id('detail.empty').translate()}</p>
+            </div>
+        `
+        entry = afx`
+            <Shel.Neos.Mcp:Component.EntryDetail.Entry
+                entry={props.selectedEntry}
+            />
+        `
+        form = afx`
+            <Shel.Neos.Mcp:Component.EntryForm
+                form={props.form}
+            />
+        `
+    }
+}

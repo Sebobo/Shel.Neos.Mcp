@@ -1,0 +1,11 @@
+# Settings and other scalars cannot be injected into #[Flow\Proxy(false)] capability classes, so the
+# agent configuration is read by a regular Flow singleton which the capabilities depend on instead.
+Shel\Neos\Mcp\Domain\SharedWorkspaceContextFactory:
+  arguments:
+    5:
+      setting: 'Shel.Neos.Mcp.agent'
+
+Shel\Neos\Mcp\Domain\MediaUploadSettings:
+  arguments:
+    1:
+      setting: 'Shel.Neos.Mcp.agent.media'

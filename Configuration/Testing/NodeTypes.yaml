@@ -1,0 +1,49 @@
+# The node types of the tests. They are only available in the "Testing" context.
+#
+# The tests must not depend on the node types of the installation they run in, so the types
+# they need are defined here. The super types are the ones of Neos itself, so the tests run
+# against the distribution of the CI as well.
+#
+# A document that owns its content in a collection, and a content element with an image - the
+# two things the tests write. They carry the MCPExposed mixin themselves, because the write
+# tools only accept types from that set and the tests must not lean on an installation that
+# happens to mark the core types with it.
+#
+# The last type stays outside the exposed set - it is what the tests use to check that a
+# create command naming a type the schema does not list is rejected.
+
+'Shel.Neos.Mcp:Testing:Document.Page':
+  superTypes:
+    'Neos.Neos:Document': true
+    'Shel.Neos.Mcp:Mixin.MCPExposed': true
+  properties:
+    title:
+      type: string
+  childNodes:
+    main:
+      type: 'Neos.Neos:ContentCollection'
+
+'Shel.Neos.Mcp:Testing:Content.Text':
+  superTypes:
+    'Neos.Neos:Content': true
+    'Shel.Neos.Mcp:Mixin.MCPExposed': true
+  properties:
+    text:
+      type: string
+
+'Shel.Neos.Mcp:Testing:Content.Image':
+  superTypes:
+    'Neos.Neos:Content': true
+    'Shel.Neos.Mcp:Mixin.MCPExposed': true
+  properties:
+    image:
+      type: 'Neos\Media\Domain\Model\ImageInterface'
+    alternativeText:
+      type: string
+    title:
+      type: string
+
+'Shel.Neos.Mcp:Testing:Unexposed':
+  properties:
+    title:
+      type: string

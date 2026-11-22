@@ -1,0 +1,177 @@
+# The role of the AI agent: a machine identity that works in the content repository over MCP.
+#
+# Every MCP capability is deny-by-default, so each one the agent may use has to be granted here
+# explicitly. The package ships two roles for the agent:
+#
+#   Shel.Neos.Mcp:McpAgent                 the read-only baseline: an agent that may look,
+#                                                   but not write
+#   Shel.Neos.Mcp:McpAgentWithWriteAccess  the baseline plus the capabilities that create,
+#                                                   change or remove content
+#
+# An installation grants one of them to the account of the agent. The write role grants:
+#
+#   Shel.Neos.Mcp:Capability.Tool.CreateNodeAggregateWithNode
+#   Shel.Neos.Mcp:Capability.Tool.SetNodeProperties
+#   Shel.Neos.Mcp:Capability.Tool.SetNodeReferences
+#   Shel.Neos.Mcp:Capability.Tool.BulkWriting
+#   Shel.Neos.Mcp:Capability.Tool.MoveNode
+#   Shel.Neos.Mcp:Capability.Tool.upload-asset
+#   Shel.Neos.Mcp:Capability.Tool.RemoveNode
+#   Shel.Neos.Mcp:Capability.Tool.DiscardChanges
+#   Shel.Neos.Mcp:Capability.Tool.RemoveFromSharedWorkspace
+#   Shel.Neos.Mcp:Capability.Tool.PublishOwnWorkspace
+#   Shel.Neos.Mcp:Capability.Tool.CreateTopicWorkspace
+#   Shel.Neos.Mcp:Capability.Tool.RebaseOwnWorkspace
+#
+# The role inherits from Neos.Neos:RestrictedEditor: the agent needs access to internal workspaces
+# to work in its personal workspace, and it must never be able to publish to the live workspace.
+#
+# The agent authenticates with a bearer token, never with a password, so the backend login is
+# denied for this role. The account the agent works as is created with a random password that is
+# never printed (see "agent:createuser"), so there is no credential that could be used to log in.
+privilegeTargets:
+  'Neos\Flow\Security\Authorization\Privilege\Method\MethodPrivilege':
+
+    # The module of the agents: the instructions the agents are told, and the entries the
+    # administrators of the installation write themselves.
+    'Shel.Neos.Mcp:Backend.AgentInstructions':
+      label: 'Allowed to manage the instructions of the agents'
+      matcher: 'method(Shel\Neos\Mcp\Controller\AgentInstructionsController->(.*)Action())'
+
+  'Neos\Neos\Security\Authorization\Privilege\ModulePrivilege':
+
+    'Shel.Neos.Mcp:Backend.Module.Administration.AgentInstructions':
+      label: 'Access to the module of the agent instructions'
+      matcher: 'administration/agentinstructions'
+
+roles:
+  # The module of the agents is for the administrators of the installation: they are the ones
+  # who know what the agents may and may not do.
+  'Neos.Neos:Administrator':
+    privileges:
+      - privilegeTarget: 'Shel.Neos.Mcp:Backend.Module.Administration.AgentInstructions'
+        permission: GRANT
+
+      - privilegeTarget: 'Shel.Neos.Mcp:Backend.AgentInstructions'
+        permission: GRANT
+
+  'Shel.Neos.Mcp:McpAgent':
+    label: 'MCP Agent'
+    description: 'Lets a token-authenticated agent read the content repository over /mcp. Read-only by default.'
+    parentRoles: ['Neos.Neos:RestrictedEditor']
+    privileges:
+      # No login with a password: the agent is authenticated by a bearer token.
+      - privilegeTarget: 'Neos.Neos:BackendLogin'
+        permission: DENY
+
+      # Access to the MCP endpoint itself.
+      - privilegeTarget: 'Sitegeist.Pandora:MCP'
+        permission: GRANT
+
+      # Reading the content repository
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-children'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-content'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-documents'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-descendants'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-subtree'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.dimensionspace'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.nodetype-full-schema'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.nodetype-basic-schema'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.query-patterns'
+        permission: GRANT
+
+      # Reading the sites
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.search-sites'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.list-site-urls'
+        permission: GRANT
+
+      # Reading the media
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-asset-collections'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-tags'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-types'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-assets'
+        permission: GRANT
+
+      # Reading the own workspace: what the agent changed so far.
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.ListUnpublishedChanges'
+        permission: GRANT
+
+      # Reading the shared review workspace
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-children-in-shared-workspace'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-content-in-shared-workspace'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-documents-in-shared-workspace'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.find-descendants-in-shared-workspace'
+        permission: GRANT
+
+      # The preview of a document: the rendered page of the workspace the agent works in. It only
+      # reads, so an agent that may look at the content may look at how it is rendered.
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.PreviewDocument'
+        permission: GRANT
+
+  # The role of an agent that may write: the read-only baseline of the role above plus the
+  # capabilities that create, change or remove content. The writing capabilities run inside
+  # withoutAuthorizationChecks(), so this list is the only gate for them.
+  'Shel.Neos.Mcp:McpAgentWithWriteAccess':
+    label: 'MCP Agent (write access)'
+    description: 'Lets a token-authenticated agent read and write the content repository over /mcp'
+    parentRoles: ['Shel.Neos.Mcp:McpAgent']
+    privileges:
+      # Writing the content repository: creating nodes, changing their properties and their
+      # references, changing several of them at once and moving them.
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.CreateNodeAggregateWithNode'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.SetNodeProperties'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.SetNodeReferences'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.BulkWriting'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.MoveNode'
+        permission: GRANT
+
+      # Uploading is a write: the asset is live immediately, no tool can take it back, and it
+      # ends up in the media collection like any other upload.
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.upload-asset'
+        permission: GRANT
+
+      # Own workspace: removal and revert. RemoveNode and DiscardChanges are the two destructive
+      # entries here - drop them to let the agent write but not destroy content.
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.RemoveNode'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.DiscardChanges'
+        permission: GRANT
+
+      # The hand-over itself: the agent publishes its own workspace into the workspace it is
+      # based on, exactly like an editor does. It can never publish into live - the base
+      # workspace of the agent's own workspace is the only target, and that is never live.
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.PublishOwnWorkspace'
+        permission: GRANT
+
+      # Topic workspaces: one workspace per topic the agent works on, based on the shared review
+      # workspace. They let two agents on different topics work without writing over each other:
+      # the agent creates one, rebases its own workspace onto it, and from then on its hand-over
+      # lands in the topic workspace, which a human reviews and publishes.
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.CreateTopicWorkspace'
+        permission: GRANT
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.RebaseOwnWorkspace'
+        permission: GRANT
+
+      # Removal from the shared review workspace: a write into a workspace humans review, so it
+      # is the entry to think twice about.
+      - privilegeTarget: 'Shel.Neos.Mcp:Capability.Tool.RemoveFromSharedWorkspace'
+        permission: GRANT
