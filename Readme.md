@@ -30,7 +30,26 @@ composer require shel/neos-mcp
 ```
 
 The package pulls in `sitegeist/pandora`, the MCP server for Neos Flow, which exposes the
-endpoint `/mcp` of the installation.
+endpoint `/mcp` of the installation. Pandora is not on Packagist yet, so the root
+`composer.json` of the project needs an entry for it - composer ignores repository
+declarations of required packages, integrators have to add it themselves:
+
+```json
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/sitegeist/Sitegeist.Pandora.git"
+    }
+],
+"require": {
+    "sitegeist/pandora": "dev-main as 1.0.0"
+}
+```
+
+(The package's own `composer.json` carries the repository entry, so installs of the package
+as a standalone project work; the `as 1.0.0` alias is needed because Pandora has no tagged
+versions, and projects with the default `minimum-stability` would not accept `dev-main`
+otherwise.)
 
 For the bearer token authentication of the setup below:
 

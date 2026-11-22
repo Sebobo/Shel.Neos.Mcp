@@ -16,6 +16,12 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/sitegeist/Sitegeist.Pandora.git"
+        }
+    ],
     "require": {
         "neos/flow": "^8.3.0",
         "mcp/sdk": "^0.7.0",
@@ -26,6 +32,7 @@
     },
     "require-dev": {
         "neos/buildessentials": "^8.3",
+        "neos/neos": "^8.3",
         "mikey179/vfsstream": "^1.6",
         "phpunit/phpunit": "^11.0",
         "symfony/css-selector": "~2.0",
