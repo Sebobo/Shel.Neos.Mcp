@@ -259,7 +259,7 @@ The capabilities of this package:
 | `CreateTopicWorkspace`, `RebaseOwnWorkspace` | the branch of the shared review workspace |
 | `find-children-in-shared-workspace`, `find-descendants-in-shared-workspace` | read the workspace the agent hands over to |
 | `RemoveFromSharedWorkspace` | remove content from the workspace the agent hands over to |
-| `PreviewDocument` | the URL of the rendered page of a document |
+| `PreviewDocument` | the preview URLs of a document: the private one of the own workspace and the shareable one of the review workspace |
 
 ### 7. The user information of the policies
 
@@ -309,17 +309,26 @@ The client connects to the endpoint of the installation and sends the token:
 
 ### 9. The preview of a document
 
-`PreviewDocument` returns the URL of the preview - the rendered page, not the content of the
-document. The preview is a frontend request, and it needs the token as well; without it the
-frontend answers with the login page instead of the page:
+`PreviewDocument` returns two preview URLs - the rendered page, not the content of the document.
+
+`ownWorkspacePreviewUrl` shows the unpublished changes of the agent. It is private: it is the
+personal workspace of the agent, and the policies deny other users the personal workspace of
+another user. Do not send it to a person.
+
+`reviewWorkspacePreviewUrl` is the link a human opens: it shows the workspace the agent hands its
+work over to - the shared review workspace, or the topic workspace while it works on a topic. It
+contains only what the agent has already published there, and the human has to be logged into the
+Neos backend. A personal workspace of the agent that is based on `live` has no review workspace,
+so the review URL is not part of the result then.
+
+The preview is a frontend request, and the agent fetches it with its token; without it the frontend
+answers with the login page instead of the page. The token is never part of a shared link:
 
 ```console
 curl -H "Authorization: Bearer <the token>" "<the url>"
 ```
 
-The preview of the own workspace shows the changes of the agent, the preview of the workspace
-it hands its work over to shows the state a reviewer sees. The preview of a personal workspace
-of another user is denied by the policies.
+The preview of a personal workspace of another user is denied by the policies.
 
 ## The commands
 
@@ -407,7 +416,7 @@ What they hold:
 - the agent may **not** reach its own workspace without the assignment of the agent to a user,
 - a capability that is not granted is not visible to the agent,
 - no capability switches the authorization checks off,
-- the URL of the preview names the workspace it renders and carries no credential.
+- the preview of the own workspace and the preview of the review workspace name the workspace they render and carry no credential.
 
 A new capability is a class with an `#[McpTool]` attribute in `Classes/Domain`. It is
 discovered automatically, and it gets a privilege target

@@ -105,12 +105,17 @@ final class SharedWorkspaceInstructionsProvider implements InstructionsProvider
               which is the opposite of RemoveNode: reverting a node you created removes it, reverting a node you edited
               restores it. Prefer DiscardChanges when you are unsure, and prefer an explicit list of node aggregate ids
               over discardAll.
-            - To see how a document looks, call PreviewDocument with the node aggregate id. It returns the URL of the
-            . preview - the rendered page, not the content of the document. Fetch the URL with the same token you use for
-            . this connection, otherwise the frontend answers with the login page instead of the page:
-            . curl -H "Authorization: Bearer <your token>" "<the url>"
-            . The preview of your own workspace shows your changes, the preview of the workspace you hand your work over
-            . to shows the state a reviewer sees.
+            - To see how a document looks, call PreviewDocument with the node aggregate id. It returns two preview
+              URLs for the rendered page, not the content of the document.
+              ownWorkspacePreviewUrl shows your unpublished changes, and it is only for you: it is your personal
+              workspace, and another user cannot open it - never send it to anyone.
+              reviewWorkspacePreviewUrl is the link to send to a human: it shows the workspace you hand your work
+              over to, the shared review workspace or your topic workspace. Publish your work there before you share
+              the link - it shows only what has been published, and a document that exists only in your own workspace
+              has no page there. The human opens it in a browser where they are logged into the Neos backend.
+              To fetch a preview URL yourself, send the same token you use for this connection, otherwise the
+              frontend answers with the login page: curl -H "Authorization: Bearer <your token>" "<the url>". Never
+              share the token with anyone.
             You never publish into the live workspace, and you never publish into a workspace you are not based on.
             The only publish you can do is into the workspace you are based on; a human decides whether it goes live.';
     }
