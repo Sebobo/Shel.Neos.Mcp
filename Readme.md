@@ -1,16 +1,103 @@
 # The MCP server for the Neos Content Repository
 
-This package gives an AI agent a controlled access to a Neos content repository: it exposes
-the content repository over the Model Context Protocol (MCP), and it keeps the agent inside
-the workspaces it is supposed to work in.
+**An AI agent that works in the content repository like a colleague: with a user of its own, a
+role with defined privileges, a personal workspace and the review workflow of the team.**
+
+This package turns an AI agent into a **team member** of a Neos installation: it gets a Neos
+user of its own, a role with defined privileges, a personal workspace, and the same review
+workflow an editor follows. Everything the agent may do is decided by **the policies of
+Neos** - the same mechanism that governs every human account - and not by anything in the
+agent.
 
 The agent works in **its own personal workspace**, hands finished work over to a **shared
 review workspace** that humans review and publish, and it never publishes to the live
 workspace. Every capability it has is a separate privilege, so an installation decides what
 the agent may do - and what it may not.
 
+Use it when AI should work on your content without becoming its own publisher: the agent
+edits like a colleague, and your editors approve like they always have.
+
 The package does not decide how the agent authenticates: the installation does. The setup
 below uses a bearer token, which is what this repository uses.
+
+## The agent as a team member
+
+The point of the package is not that an agent can talk to the content repository - it is
+that the agent occupies a place in the team and is bound by the same rules as everybody else
+in it.
+
+| In the team | The agent |
+| --- | --- |
+| An account with a role | A Neos user with a token, and the role `Shel.Neos.Mcp:McpAgent` (read-only) or `Shel.Neos.Mcp:McpAgentWithWriteAccess` |
+| A personal workspace nobody else may read | The personal workspace of that user - the changes stay private until the agent hands them over |
+| A handover into a shared workspace for review | `PublishOwnWorkspace` into the shared review workspace |
+| A topic branch, so nobody overwrites anybody | A topic workspace (`CreateTopicWorkspace`, `RebaseOwnWorkspace`) - two agents, or an agent and an editor, work on different topics at the same time |
+| House rules from onboarding | The instruction providers of the package and the instructions the administrators write in the backend module "Agent instructions" |
+| Rights that can be withdrawn | The token is revoked and the role is changed - a capability that is not granted is not merely denied, it is invisible to the agent |
+
+For the editors of the installation none of this changes their workflow: the agent is
+another workspace that produces changes to be reviewed, and the review happens where it
+always happens - in the shared review workspace, with the preview of the document and the
+usual publish to live.
+
+## A typical work cycle
+
+This is the workflow the agents are instructed with - told from the outside, it looks like
+this:
+
+1. Somebody gives the agent a task - a brief, a list, a file.
+2. The agent works in its own workspace. Nothing of it is visible on the site, and nothing of
+   it is visible to the other users.
+3. When a coherent unit is done - a finished page, not every single node edit - the agent
+   hands that package over with `PublishOwnWorkspace`. It publishes into the workspace it is
+   based on: the shared review workspace, or the topic workspace while it works on a topic.
+4. The editors review the changes in the shared review workspace, open the preview of the
+   document and publish to live. The preview URL the agent shares with them is the one of the
+   review workspace - the preview of its own workspace is private to the agent and must not
+   be sent to anybody.
+5. Corrections travel the same way: the agent changes its own workspace and publishes again,
+   and the publish replaces what it handed over before. It does not edit the review workspace
+   itself - publishing is the only way for it to put content in there.
+
+For a topic the agent rebases its own workspace onto the topic workspace before it starts:
+the changes it has made so far stay in its workspace, but they are relative to the new base
+from then on.
+
+## What you can use it for
+
+The package does not prescribe a use case - it gives an agent the rights and the workspaces
+for the use cases of the installation. The ones that pay off in practice:
+
+- **Audits with a read-only agent.** Missing alt texts, inconsistent teasers, empty SEO
+  fields, questions about the structure: the agent reads and reports, and it cannot write
+  at all, because the write capabilities are not granted.
+- **Editorial bulk work.** Heading structures, metadata, moving and restructuring node trees
+  - `BulkWriting` and `MoveNode` do it in one validated batch.
+- **Pages from structured input.** Product lists, locations, glossary terms: the agent
+  creates the nodes with the node types of the installation, and the validators of the node
+  type reject what does not fit.
+- **Language and dimension variants.** The agent is instructed about the fallback chains of
+  the dimension presets, so it writes into the variant that is asked for.
+- **Media.** Uploads go into one asset collection and carry a tag, so every asset an agent
+  brought in is easy to find and to clean up.
+
+## Why an agency can offer this to a customer
+
+- **No new security model.** Access is Neos roles and policies, the review is the Neos
+  workspace model. The integration adds no new place where content or credentials live.
+- **The human in the loop is enforced.** Publishing to live is denied by the policy
+  `Neos.Neos:Backend.PublishToLiveWorkspace` - in the policies of the installation and
+  covered by the tests of the package, not in a prompt.
+- **A gradual path.** Every customer starts on the read-only role, the write access is
+  granted per project, and a capability that is not needed is taken away again - with
+  `capability:list` the agency sees exactly what a role unlocks.
+- **Several agents per installation.** Topic workspaces let an agency run more than one
+  agent per installation without them writing over each other, while the editors keep
+  reviewing in one place.
+- **Governance without code.** The module "Agent instructions" holds the house rules per
+  role, and the capabilities of the package hide themselves when they are not granted.
+- **Audit.** Every handover is a workspace diff, every upload carries a tag, and the agent
+  is a named account in the backend.
 
 ## The workspaces
 
@@ -22,6 +109,9 @@ below uses a bearer token, which is what this repository uses.
 
 The agent addresses its own workspace with the regular read and write tools. It cannot
 address the live workspace or the workspace of another agent.
+
+The editors of the installation keep working the way they did: they review the changes in
+the shared review workspace and publish them to live themselves.
 
 ## Installation
 
@@ -356,7 +446,7 @@ Sitegeist:
 ```
 
 The administrators of the installation add their own instructions in the backend module
-"Agent Instructions" - the module is granted to `Neos.Neos:Administrator` by the `Policy.yaml`
+"Agent instructions" - the module is granted to `Neos.Neos:Administrator` by the `Policy.yaml`
 of this package.
 
 ## What the policies enforce

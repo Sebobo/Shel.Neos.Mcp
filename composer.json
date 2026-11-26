@@ -1,6 +1,6 @@
 {
     "name": "shel/neos-mcp",
-    "description": "MCP server components for interaction with the Neos Content Repository, built on Sitegeist.Pandora. Gives an AI agent controlled, workspace-safe access to the repository. Supposedly very powerful, with questionable results",
+    "description": "MCP server components for interaction with the Neos Content Repository, built on Sitegeist.Pandora. Gives an AI agent a seat in the Neos team: a user of its own, a role with defined privileges, a personal workspace and the review workflow of the editors, enforced by the policies of Neos.",
     "license": "GPL-3.0-or-later",
     "type": "neos-package",
     "config": {
